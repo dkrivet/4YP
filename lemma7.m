@@ -1,7 +1,8 @@
+function H_c = lemma7(F, G, K, V)
 % Set initial values
 
-F = [0 -3.33; 0 0];
-G = [0; 1];
+% F = [0 -3.33; 0 0];
+% G = [0; 1];
 % K = ...
 % V = ...    V has 9 rows
 
@@ -29,6 +30,7 @@ for i = 1:length(n_alpha)
 
     
     H_c(i) = value(H * ones(length(H(1,:)), 1));
+end
 end
 
 
