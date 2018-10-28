@@ -1,10 +1,18 @@
-function H_c = lemma7(F, G, K, V)
+function H_c = lemma7()
 % Set initial values
 
-% F = [0 -3.33; 0 0];
-% G = [0; 1];
-% K = ...
-% V = ...    V has 9 rows
+F = [0 -3.33; 0 0];
+G = [0; 1];
+% K = ...;
+
+% use the generate_polytope3 script that Prof Cannon sent me
+[V, theta, imax] = generate_polytope3(2, 5);
+% this script creates a V matrix with dimensions (2^second_argument, 2)
+
+% We want V with 9 rows, but we have to append a row from F to it so take
+% first 8 rows of V
+V = V(1:8,:);
+
 
 
 % Set YALMIP decision variables
