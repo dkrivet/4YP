@@ -1,35 +1,41 @@
-function H_i = lemma8(PI_theta, pi_t, A0, A1, A2, A3, B0, B1, B2, B3, K, V)
+function H_final = lemma8(PI_theta, pi_t, A0, A1, A2, A3, B0, B1, B2, B3, K, V)
 % Implementation of Lemma 8 from Robust Adaptive Tube Model Predictive
 % Control
 
 % Define important values
 
-% PI_theta = [1 0 0;0 1 0;0 0 1;-1 0 0;0 -1 0;0 0 -1];
-% PI_w = [1 0;0 1;-1 0;0 -1];
-% D = [(A1 * x_t_1+ B1* u_t_1) (A2 * x_t_1+ B2* u_t_1) (A3 * x_t_1+ B3* u_t_1)];
-% P_t = -PI_w * D;
-vertices_of_theta = con2vert(PI_theta,pi_t);
-% j will be chosen dynamically I assume
-j = 2;
-theta_hat_j = [ones(length(vertices_of_theta(1,:)),1) vertices_of_theta(j,:)'];
-% we want theta_hat_j'
+n_alpha = length(V(:,1));
+
+vertices = con2vert(PI_theta,pi_t);
+theta_hat_transpose = [ones(length(vertices(:,1)),1) vertices];
 
 % set YALMIP decision variables
+p = 3;
 H = sdpvar(p + 1,n_alpha);
 
-% set constraints
-Constraints = [theta_hat_j * H, j >= 1, j<= m, H * V == [V(1,:) * (A0 + B0 * K); V(2,:) * (A1 + B1 * K);
-    V(3,:) * (A2 + B2 * K); V(4,:) * (A3 + B3 * K)]];
 
-% set objective that we want to minimize
-Objective = max(theta_hat_j' * H * ones(length(H(1,:)),1));
-
-% set options for solveer
+% set options for solver
 options = sdpsettings('solver','gurobi');
 
-% solve the optimization
-sol = optimize(Constraints, Objective, options);
+for i = 1:n_alpha
+    
+    % set constraints
+    Constraints = [];
+    for j = 1:length(vertices(:,1))
+        Constraints = [Constraints, theta_hat_transpose(j,:) * H >= 0];
+    end
 
-H_i = value(max(theta_hat_j' * H * ones(length(H(1,:)),1)));
+    Constraints = [Constraints, H * V == [V(i,:) * (A0 + B0 * K); V(i,:) * (A1 + B1 * K);
+     V(i,:) * (A2 + B2 * K); V(i,:) * (A3 + B3 * K)]];
+
+    % set objective that we want to minimize
+    % Objective = max(theta_hat_transpose(j,:) * H * ones(length(H(1,:)),1));
+    Objective = max(theta_hat_transpose * H * ones(length(H(1,:)),1));
+
+
+    % solve the optimization
+    sol = optimize(Constraints, Objective, options);
+
+    H_final{i} = value(max(theta_hat_transpose(j,:) * H * ones(length(H(1,:)),1)));
 
 end 
