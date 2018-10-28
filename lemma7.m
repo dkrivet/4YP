@@ -13,6 +13,14 @@ G = [0; 1];
 % first 8 rows of V
 V = V(1:8,:);
 
+% We want to add to V a row that is a row of F that corresponds to the row
+% of G that is 0
+
+% Ive done it manually here but may want to do it dynamically later:
+V = [V; 0 -3.33];
+n_alpha = length(V(:,1));
+K = calculate_K_from_V(V);
+
 
 
 % Set YALMIP decision variables
@@ -20,11 +28,12 @@ H = sdpvar(1,n_alpha);
 
 
 % set the value of n_alpha
-% n_alpha = ... 
+n_alpha = length(V(:,1));
 
-for i = 1:length(n_alpha)
+
+A = F + G * K;
+for i = 1:length(A(:,1))
     % Set constraints
-    A = F + G * K;
     Constraints = [H >= 0, H * V == A(i,:)];
     
     % Set objective we want to minimize
