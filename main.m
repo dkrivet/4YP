@@ -51,20 +51,12 @@ H_hat = lemma8(PI_theta, pi_t, A0, A1, A2, A3, B0, B1, B2, B3, K, V);
 
 
 % Calculate H_Q and H_R:
+Q = [1 0;0 1];
+R = 1;
+[H_Q, H_R] = lemma10(V, Q, R, K);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+% disp(value(H_Q))
+% disp(value(H_R))
 
 
 
@@ -78,5 +70,6 @@ pi_t_plus_one = parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x_t_1,u_t_1,x_t,PI_
 vertices = con2vert(PI_theta,(pi_t_plus_one)');
 % disp(V)
 
+end 
 
 
