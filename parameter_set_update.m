@@ -1,32 +1,8 @@
 function pi_t_plus_one = parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x_t_1,u_t_1,x_t,PI_theta,PI_w,pi_t,pi_w)
-% A0 = [0.5 0.2;-0.1 0.6];
-% A1 = [0.042 0;0.072 0.03];
-% A2 = [0.015 0.019;0.009 0.035];
-% A3 = [0 0;0 0];
-% B0 = [0; 0.5];
-% B1 = [0;0];
-% B2 = [0;0];
-% B3 = [0.0397;0.059];
 
-% Define the initial condition:
-% x_t_1 = [3; 6];
-
-% These following two values I'm not sure how to obtain so have chosen
-% random values
-% u_t_1 = -1;  % define arbitrary initial control input
-
-% what is the next state
-% x_t = [2.9; 3.2];
-
-
-% PI_theta = [1 0 0;0 1 0;0 0 1;-1 0 0;0 -1 0;0 0 -1];
-% PI_w = [1 0;0 1;-1 0;0 -1];
 D = [(A1 * x_t_1+ B1* u_t_1) (A2 * x_t_1+ B2* u_t_1) (A3 * x_t_1+ B3* u_t_1)];
 P_t = -PI_w * D;
 
-
-% pi_t = [1; 1; 1; 1; 1; 1];
-% pi_w = [0.1; 0.1; 0.1; 0.1];
 d_t = A0 * x_t_1 + B0 * u_t_1 - x_t;
 
 Q_t = pi_w + PI_w *d_t;
