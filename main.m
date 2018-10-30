@@ -24,11 +24,33 @@ PI_w = [1 0;0 1;-1 0;0 -1];
 pi_t = [1; 1; 1; 1; 1; 1];
 pi_w = [0.1; 0.1; 0.1; 0.1];
 
+% define F and G matrices to satisfy constraints on state and input
+F = [0 -3.33; 0 0];
+G = [0; 1];
 
 %% Offline Section of the Proposed Algorithm 
 % Offline: given an initial parameter set estimate THETA_0, choose V and
-% compute K, and lambda
+% compute K, Y, H_c, H_1_hat, ..., H_n_alpha_hat, H_Q, and H_R
 
+% Choose V matrix
+
+% creates a V matrix with dimensions 2^5 x 2
+V = generate_polytope3(2, 5);
+% Take first 8 rows of V
+V = V(1:8,:);
+% append row of F that corresponds to row of 0s in G
+V = [V; 0 -3.33];
+
+% Calculate H_c and K, and lambda using lemma7():
+[H_c, K, lambda] = lemma7(A0, A1, A2, A3, B0, B1, B2, B3, PI_theta, pi_t, F, G, V);
+% display(value(lambda))
+
+% Calculate H_1_hat, ..., H_n_alpha_hat by using lemma8():
+H_hat = lemma8(PI_theta, pi_t, A0, A1, A2, A3, B0, B1, B2, B3, K, V);
+% Access elements of H_hat by using H_hat{i}
+
+
+% Calculate H_Q and H_R:
 
 
 
@@ -53,7 +75,7 @@ pi_w = [0.1; 0.1; 0.1; 0.1];
 pi_t_plus_one = parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x_t_1,u_t_1,x_t,PI_theta,PI_w,pi_t,pi_w);
 
 % calculate vertices of the newly updated parameter set 
-[V,nr] = con2vert(PI_theta,(pi_t_plus_one)');
+vertices = con2vert(PI_theta,(pi_t_plus_one)');
 % disp(V)
 
 
