@@ -1,4 +1,6 @@
 function main()
+tic % time the execution of the main function 
+
 %% define important values for the problem
 A0 = [0.5 0.2;-0.1 0.6];
 A1 = [0.042 0;0.072 0.03];
@@ -47,7 +49,8 @@ V = [V; 0 -3.33];
 
 % Calculate H_1_hat, ..., H_n_alpha_hat by using lemma8():
 H_hat = lemma8(PI_theta, pi_t, A0, A1, A2, A3, B0, B1, B2, B3, K, V);
-% Access elements of H_hat by using H_hat{i}
+% Access elements of H_hat by using H_hat(i)
+% disp(H_hat)
 
 
 % Calculate H_Q and H_R:
@@ -58,7 +61,7 @@ R = 1;
 % disp(value(H_Q))
 % disp(value(H_R))
 
-
+% Offline section done! 
 
 %% Online Section of the Proposed Algorithm 
 
@@ -70,6 +73,11 @@ pi_t_plus_one = parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x_t_1,u_t_1,x_t,PI_
 vertices = con2vert(PI_theta,(pi_t_plus_one)');
 % disp(V)
 
+% update lambda_t
+lambda_t = update_lambda_t(vertices, H_hat);
+% disp(lambda_t)
+
+time_elapsed = toc
 end 
 
 
