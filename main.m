@@ -77,8 +77,8 @@ pi_t_plus_one = parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x_t_1,u_t_1,x_t,PI_
 % calculate vertices of the newly updated parameter set:
 % need to find a better way to do this than to use con2vert (too
 % computationally expensive)
-vertices = con2vert(PI_theta,(pi_t_plus_one)');
-% disp(V)
+vertices = compute_vertices(PI_theta,(pi_t_plus_one)');
+% disp(vertices)
 
 % update lambda_t:
 lambda_t = update_lambda_t(vertices, H_hat);
@@ -88,7 +88,7 @@ lambda_t = update_lambda_t(vertices, H_hat);
 
 % disp(H_hat)
 % disp(H_Q)
-disp(H_c)
+% disp(pi_t_plus_one)
 time_elapsed = toc
 end 
 

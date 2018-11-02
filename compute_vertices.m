@@ -1,18 +1,24 @@
 function vertices = compute_vertices(PI_theta, pi_t)
-rows_of_PI_theta = size(PI_theta);
-rows_of_PI_theta = rows_of_PI_theta(1);
+
 
 % create the diagonal matrix:
-diag_matrix = ones(rows_of_PI_theta, rows_of_PI_theta);
-diag_matrix(:,end) = -1;
+diag_matrix = [1 1 1 1 -1 -1 -1 -1;1 1 -1 -1 1 1 -1 -1;1 -1 1 -1 1 -1 1 -1];
 
-for i = 2:rows_of_PI_theta
-    diag_matrix(i,i) = -1;
+a = length(pi_t);
+
+theta_0 = (1/2) * (pi_t(1:a/2) - pi_t((a/2) + 1: end));
+
+if pi_t(1:a/2) == pi_t((a/2) + 1: end)
+    for i = 1:length(diag_matrix(1,:))
+        vertices(i,:) = diag_matrix(:,i) .* pi_t(1:a/2);
+    end
+else
+    pi_t = [(1/2)*(pi_t(1:a/2) + pi_t((a/2)+1:end)) ; (1/2)*(pi_t(1:a/2) + pi_t((a/2)+1:end))];
+    for i = 1:length(diag_matrix(1,:))
+        vertices(i,:) = diag_matrix(:,i) .* pi_t(1:a/2);
+        %size(vertices(i,:))
+        %size(theta_0)
+        vertices(i,:) = vertices(i,:) + theta_0';
+    end
 end
 
-
-A = diag_matrix * pi_t;
-
-
-% delete non-unique rows of A
-B = unique(A,'rows')
