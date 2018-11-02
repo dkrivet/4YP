@@ -45,8 +45,8 @@ for i = 1:length(A(:,1))
     % Solve the optimization
     sol = optimize(Constraints, Objective, options);
 
-    
-    H_c(i) = value(H * ones(length(H(1,:)), 1));
+    H_c(i,:) = value(H);
+    % H_c(i) = value(H * ones(length(H(1,:)), 1));
 end
 end
 

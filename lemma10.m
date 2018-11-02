@@ -18,7 +18,8 @@ for i = 1:length(Q(:,1))
     % solve the optimization 
     sol = optimize(Constraints, Objective, options);
     
-    H_Q(i) = value(H) * (ones(length(V(:,1)), 1));
+    H_Q{i} = value(H);
+    % H_Q(i) = value(H) * (ones(length(V(:,1)), 1));
 end
 
 
@@ -29,5 +30,8 @@ Constraints = [H >= 0, H * V == R * K];
 % solve the optimization 
 sol = optimize(Constraints, Objective, options);
 
-H_R = H * ones(length(V(:,1)), 1);
+H_R = value(H);
+%H_R = H * ones(length(V(:,1)), 1);
+
+end
 

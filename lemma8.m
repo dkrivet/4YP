@@ -35,6 +35,7 @@ for i = 1:n_alpha
     % solve the optimization
     sol = optimize(Constraints, Objective, options);
 
-    H_final(i) = value(max(theta_hat_transpose(j,:) * H * ones(length(H(1,:)),1)));
+    H_final{i} = value(H);
+    % H_final(i) = value(max(theta_hat_transpose(j,:) * H * ones(length(H(1,:)),1)));
 
 end 

@@ -5,7 +5,7 @@ theta_hat_transpose = [ones(length(vertices(:,1)),1) vertices];
 maximum = 0;
 for j = 1:length(vertices(:,1))
     for i = 1:length(H_hat)
-        temp = theta_hat_transpose(j,:) * H_hat(i) * ones(4,1);
+        temp = theta_hat_transpose(j,:) * H_hat{i} * ones(9,1);
         if temp >= maximum
             maximum = temp;
         end 

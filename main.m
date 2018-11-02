@@ -2,6 +2,9 @@ function main()
 tic % time the execution of the main function 
 
 %% define important values for the problem
+% length of prediction horizon 
+N = 10;
+
 A0 = [0.5 0.2;-0.1 0.6];
 A1 = [0.042 0;0.072 0.03];
 A2 = [0.015 0.019;0.009 0.035];
@@ -41,15 +44,17 @@ V = generate_polytope3(2, 5);
 % Take first 8 rows of V
 V = V(1:8,:);
 % append row of F that corresponds to row of 0s in G
-V = [V; 0 -3.33];
+V = [V; 0 -3.33]; % V is 9 x 2
 
 % Calculate H_c and K, and lambda using lemma7():
 [H_c, K, lambda] = lemma7(A0, A1, A2, A3, B0, B1, B2, B3, PI_theta, pi_t, F, G, V);
+%size(H_c)
 % display(value(lambda))
 
 % Calculate H_1_hat, ..., H_n_alpha_hat by using lemma8():
 H_hat = lemma8(PI_theta, pi_t, A0, A1, A2, A3, B0, B1, B2, B3, K, V);
-% Access elements of H_hat by using H_hat(i)
+% H_hat is 1 x 9
+% Access elements of H_hat by using H_hat{i}
 % disp(H_hat)
 
 
@@ -69,14 +74,21 @@ R = 1;
 % Do the parameter set update with this function to get pi_t_plus_one
 pi_t_plus_one = parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x_t_1,u_t_1,x_t,PI_theta,PI_w,pi_t,pi_w);
 
-% calculate vertices of the newly updated parameter set 
+% calculate vertices of the newly updated parameter set:
+% need to find a better way to do this than to use con2vert (too
+% computationally expensive)
 vertices = con2vert(PI_theta,(pi_t_plus_one)');
 % disp(V)
 
-% update lambda_t
+% update lambda_t:
 lambda_t = update_lambda_t(vertices, H_hat);
 % disp(lambda_t)
 
+% compute the optimal solution:
+
+% disp(H_hat)
+% disp(H_Q)
+disp(H_c)
 time_elapsed = toc
 end 
 
