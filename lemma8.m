@@ -7,7 +7,7 @@ function H_final = lemma8(PI_theta, pi_t, A0, A1, A2, A3, B0, B1, B2, B3, K, V)
 n_alpha = length(V(:,1));
 p = 3;
 
-vertices = con2vert(PI_theta,pi_t);
+vertices = compute_vertices(PI_theta,pi_t);
 theta_hat_transpose = [ones(length(vertices(:,1)),1) vertices];
 
 % set YALMIP decision variables

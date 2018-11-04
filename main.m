@@ -70,7 +70,6 @@ R = 1;
 
 %% Online Section of the Proposed Algorithm 
 
-
 % Do the parameter set update with this function to get pi_t_plus_one
 pi_t_plus_one = parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x_t_1,u_t_1,x_t,PI_theta,PI_w,pi_t,pi_w);
 

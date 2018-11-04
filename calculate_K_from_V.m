@@ -5,7 +5,7 @@ n_alpha = length(V(:,1)); % # of rows in V
 p = 3; % Because we have A0, A1, A2, A3
 
 
-vertices = con2vert(PI_theta,pi_t);
+vertices = compute_vertices(PI_theta,pi_t);
 theta_hat_transpose = [ones(length(vertices(:,1)),1) vertices];
 
 
