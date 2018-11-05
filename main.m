@@ -84,10 +84,14 @@ lambda_t = update_lambda_t(vertices, H_hat);
 % disp(lambda_t)
 
 % compute the optimal solution:
+theta_hat = [0 0 0];
+theta_hat_transpose = [ones(length(vertices(:,1)),1) vertices];
+optimal_cost = compute_optimal_solution(A0, A1, A2, A3, B0, B1, B2, B3, N, H_c, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x_t, theta_hat);
 
 % disp(H_hat)
 % disp(H_Q)
 % disp(pi_t_plus_one)
+% disp(K)
 time_elapsed = toc
 end 
 
