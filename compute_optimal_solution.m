@@ -1,4 +1,4 @@
-function optimal_cost = compute_optimal_solution(A0, A1, A2, A3, B0, B1, B2, B3, N, H_c, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x_k, theta_hat)
+function [optimal_cost, optimal_control_input] = compute_optimal_solution(A0, A1, A2, A3, B0, B1, B2, B3, N, H_c, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x_k, theta_hat)
 
 m = length(vertices(:,1));
 % use compute_w_bar to get the value of w_bar for use later on:
@@ -9,8 +9,8 @@ w_bar = compute_w_bar(PI_w, pi_w, V); % w_bar is array of length 9
 v_k = sdpvar(N,1);
 % the way this is defined, the columns of alpha_k make up alpha(0|k),
 % alpha(1|k) , ... , alpha (N-1|k)
-alpha_k = sdpvar(length(V(:,1)),N); % dimensions of 9 x 10
-alpha_N_plus_one = sdpvar(length(V(:,1)), 1);
+alpha_k = sdpvar(length(V(:,1)),N+1); % dimensions of 9 x 11
+
 
 
 
@@ -28,6 +28,8 @@ for i = 1:N
     Constraints = [Constraints, H_c * alpha_k(:,i) + G * v_k(i) <= ones(2,1)];
 end
 
+% ask about this line. Probably not right to just say alpha_k_plus_one is a
+% vector of ones
 alpha_k_plus_one = ones(1,length(V(:,1)));
 for i = 1:length(V(:,1))
     for j = 1:length(vertices(:,1))
@@ -37,21 +39,26 @@ for i = 1:length(V(:,1))
 end
 
 Constraints = [Constraints, alpha_k(1) >= V * x_k];
-Constraints = [Constraints, H_c * alpha_N_plus_one <= ones(size(H_c * alpha_N_plus_one))];
+Constraints = [Constraints, H_c * alpha_k(:,N+1) <= ones(size(H_c * alpha_k(:,N+1)))];
 
 for i = 1:length(V(:,1))
     for j = 1:m
-        Constraints = [Constraints, alpha_N_plus_one(i) >= theta_hat_transpose(j,:) * H_hat{i} * alpha_N_plus_one + w_bar(i)];
+        Constraints = [Constraints, alpha_k(i,N+1) >= theta_hat_transpose(j,:) * H_hat{i} * alpha_k(:,N+1) + w_bar(i)];
     end
 end
 
 % set solver options
-options = sdpsettings('solver','gurobi');
+options = sdpsettings('solver','gurobi','verbose',0);
+% options = sdpsettings('solver','gurobi');
 
 % solve the optimization
 sol = optimize(Constraints, Objective, options);
 
-optimal_cost = v_k' * H * v_k + 2 * f_transpose * v_k;
+optimal_cost = value(v_k' * H * v_k + 2 * f_transpose * v_k);
+optimal_control_input = value(K * x_k + v_k(1));
+
+
+value(H_c * alpha_k(:,10) + G * value(v_k(10,1)))
 
 end 
 

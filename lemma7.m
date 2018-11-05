@@ -30,6 +30,10 @@ n_alpha = length(V(:,1));
 % Set YALMIP decision variables
 H = sdpvar(1,n_alpha);
 
+% set options for solver
+options = sdpsettings('solver','gurobi','verbose',0);
+% options = sdpsettings('solver','gurobi');
+
 
 A = F + G * K;
 for i = 1:length(A(:,1))
@@ -39,8 +43,7 @@ for i = 1:length(A(:,1))
     % Set objective we want to minimize
     Objective = H * ones(length(H(1,:)), 1); % vector of ones must be the right size
     
-    % set options for solver
-    options = sdpsettings('solver','gurobi');
+    
 
     % Solve the optimization
     sol = optimize(Constraints, Objective, options);

@@ -7,7 +7,7 @@ w = sdpvar(length(PI_w(1,:)), 1);
 Constraints = [PI_w * w <= pi_w];
 
 % set options for solver
-options = sdpsettings('solver','gurobi');
+options = sdpsettings('solver','gurobi','verbose',0);
 
 for i = 1:length(V(:,1))
     % set objective

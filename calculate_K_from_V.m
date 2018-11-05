@@ -31,7 +31,7 @@ end
 Objective = lambda;
 
 % set options for solver
-options = sdpsettings('solver','gurobi');
+options = sdpsettings('solver','gurobi','verbose',0);
 
 % solve the optimization 
 sol = optimize(Constraints, Objective, options);

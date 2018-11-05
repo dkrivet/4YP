@@ -14,7 +14,8 @@ theta_hat_transpose = [ones(length(vertices(:,1)),1) vertices];
 H = sdpvar(p + 1,n_alpha);
 
 % set options for solver
-options = sdpsettings('solver','gurobi');
+options = sdpsettings('solver','gurobi','verbose',0);
+% options = sdpsettings('solver','gurobi');
 
 for i = 1:n_alpha
     

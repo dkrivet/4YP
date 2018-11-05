@@ -15,6 +15,11 @@ Q_t = pi_w + PI_w *d_t;
 H_i = sdpvar(1,10);
 var_pi = sdpvar(1);
 
+
+% set options for solver
+% options = sdpsettings('solver','gurobi');
+options = sdpsettings('solver','gurobi','verbose',0);
+
 for i=1:length(pi_t)
     % set constraints
     % Constraints = [H_i * [PI_theta; P_t] >= PI_theta(1,:)];
@@ -27,10 +32,6 @@ for i=1:length(pi_t)
 
     % set objective that we want to minimize 
     Objective = var_pi;
-
-    % set options for solver
-    % options = sdpsettings('verbose',1,'solver','gurobi');
-    options = sdpsettings('solver','gurobi');
 
     % Solve the optimization
     % sol = optimize([Constraints, -1000<= var_pi <= 1000], Objective);

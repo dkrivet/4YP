@@ -6,7 +6,9 @@ function [H_Q, H_R] = lemma10(V, Q, R, K)
 H = sdpvar(1,length(V(:,1)));
 
 % set options for solver
-options = sdpsettings('solver','gurobi');
+options = sdpsettings('solver','gurobi','verbose',0);
+%options = sdpsettings('solver','gurobi');
+
 
 % set objective
 Objective = H * ones(length(V(:,1)), 1);
