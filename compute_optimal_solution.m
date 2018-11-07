@@ -30,11 +30,13 @@ end
 
 % ask about this line. Probably not right to just say alpha_k_plus_one is a
 % vector of ones
-alpha_k_plus_one = ones(1,length(V(:,1)));
+% alpha_k_plus_one = ones(1,length(V(:,1)));
 for i = 1:length(V(:,1))
     for j = 1:length(vertices(:,1))
         [A_theta_j, B_theta_j] = calculate_AandB_theta_j(B0,B1,B2,B3,A0,A1,A2,A3,vertices(j,:));
-        Constraints = [Constraints, theta_hat_transpose(j,:) * H_hat{i} * alpha_k(:,i) + V(i,:) * B_theta_j * v_k(i) + w_bar(i) <= alpha_k_plus_one(i)];
+        for k = 1:N
+            Constraints = [Constraints, theta_hat_transpose(j,:) * H_hat{i} * alpha_k(:,k) + V(i,:) * B_theta_j * v_k(k) + w_bar(i) <= alpha_k(i,k+1)];
+        end 
     end
 end
 
@@ -56,9 +58,10 @@ sol = optimize(Constraints, Objective, options);
 
 optimal_cost = value(v_k' * H * v_k + 2 * f_transpose * v_k);
 optimal_control_input = value(K * x_k + v_k(1));
+% v_k(1)
 
 
-value(H_c * alpha_k(:,10) + G * value(v_k(10,1)))
+% value(H_c * alpha_k(:,10) + G * value(v_k(10,1)))
 
 end 
 

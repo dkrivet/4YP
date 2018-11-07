@@ -20,28 +20,21 @@ end
 a = zeros(2,1);
 % 
 % % This surely can be done in a better way:
-% C(:,1) = [B ; PHI * B; PHI^2 * B; PHI^3 * B; PHI^4 * B; PHI^5 * B; PHI^6 * B; PHI^7 * B; PHI^8 * B; PHI^9 * B];
-% C(:,2) = [a ; B; PHI * B; PHI^2 * B; PHI^3 * B; PHI^4 * B; PHI^5 * B; PHI^6 * B; PHI^7 * B; PHI^8 * B];
-% C(:,3) = [a ; a; B; PHI * B; PHI^2 * B; PHI^3 * B; PHI^4 * B; PHI^5 * B; PHI^6 * B; PHI^7 * B];
-% C(:,4) = [a ; a; a; B; PHI * B; PHI^2 * B; PHI^3 * B; PHI^4 * B; PHI^5 * B; PHI^6 * B];
-% C(:,5) = [a ; a; a; a; B; PHI * B; PHI^2 * B; PHI^3 * B; PHI^4 * B; PHI^5 * B];
-% C(:,6) = [a ; a; a; a; a; B; PHI * B; PHI^2 * B; PHI^3 * B; PHI^4 * B];
-% C(:,7) = [a ; a; a; a; a; a; B; PHI * B; PHI^2 * B; PHI^3 * B];
-% C(:,8) = [a ; a; a; a; a; a; a; B; PHI * B; PHI^2 * B];
-% C(:,9) = [a ; a; a; a; a; a; a; a; B; PHI * B];
-% C(:,10) = [a ; a; a; a; a; a; a; a; a; B];
+% C(:,1) = [B_hat ; PHI * B_hat; PHI^2 * B_hat; PHI^3 * B_hat; PHI^4 * B_hat; PHI^5 * B_hat; PHI^6 * B_hat; PHI^7 * B_hat; PHI^8 * B_hat; PHI^9 * B_hat];
+% C(:,2) = [a ; B_hat; PHI * B_hat; PHI^2 * B_hat; PHI^3 * B_hat; PHI^4 * B_hat; PHI^5 * B_hat; PHI^6 * B_hat; PHI^7 * B_hat; PHI^8 * B_hat];
+% C(:,3) = [a ; a; B_hat; PHI * B_hat; PHI^2 * B_hat; PHI^3 * B_hat; PHI^4 * B_hat; PHI^5 * B_hat; PHI^6 * B_hat; PHI^7 * B_hat];
+% C(:,4) = [a ; a; a; B_hat; PHI * B_hat; PHI^2 * B_hat; PHI^3 * B_hat; PHI^4 * B_hat; PHI^5 * B_hat; PHI^6 * B_hat];
+% C(:,5) = [a ; a; a; a; B_hat; PHI * B_hat; PHI^2 * B_hat; PHI^3 * B_hat; PHI^4 * B_hat; PHI^5 * B_hat];
+% C(:,6) = [a ; a; a; a; a; B_hat; PHI * B_hat; PHI^2 * B_hat; PHI^3 * B_hat; PHI^4 * B_hat];
+% C(:,7) = [a ; a; a; a; a; a; B_hat; PHI * B_hat; PHI^2 * B_hat; PHI^3 * B_hat];
+% C(:,8) = [a ; a; a; a; a; a; a; B_hat; PHI * B_hat; PHI^2 * B_hat];
+% C(:,9) = [a ; a; a; a; a; a; a; a; B_hat; PHI * B_hat];
+% C(:,10) = [a ; a; a; a; a; a; a; a; a; B_hat];
+
 C = zeros(2 * N, N);
-for i = 1:2:2*N
-    for j = 1:N
-        if (j >= i && j ~= 1) || ((abs(j - i) <= floor(j/2)) && j > 3)
-            C(i:i+1,j) = a;
-        elseif j == ceil(i/2);
-            C(i:i+1,j) = B_hat;
-        else
-            C(i:i+1, j) = A_hat^(ceil(i/2) - j) * B_hat;
-        end
-    end
-end 
+first_row = [B_hat a a a a a a a a a];
+C = create_C_matrix(C, first_row, 1, N, PHI, B_hat, 0);
+
 
 
 
@@ -62,7 +55,7 @@ P = dlyap((A_hat + B_hat * K)', -Q - K' * R * K);
 P = -P;
 
 % Create Q_bar
-Q_bar = ones(2 * N, 2 * N);
+Q_bar = zeros(2 * N, 2 * N);
 for i = 1:2:2*N
     for j = 1:2:2*N
         if (i == j) && i ~= 2 * N -1
@@ -72,6 +65,7 @@ for i = 1:2:2*N
         end
     end
 end 
+
             
 
 

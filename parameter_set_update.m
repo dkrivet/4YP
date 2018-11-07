@@ -22,11 +22,6 @@ options = sdpsettings('solver','gurobi','verbose',0);
 
 for i=1:length(pi_t)
     % set constraints
-    % Constraints = [H_i * [PI_theta; P_t] >= PI_theta(1,:)];
-    % Constraints = [Constraints, H_i * [PI_theta; P_t] <= PI_theta(1,:)];
-    % Constraints = [Constraints, H_i >= 0, H_i * [pi_t; Q_t] <= var_pi];
-    % Constraints = [Constraints, var_pi >= 0];
-
     Constraints = [H_i * [PI_theta; P_t] == PI_theta(i,:), H_i * [pi_t; Q_t] <= var_pi, H_i >= 0];
 
 
@@ -38,24 +33,8 @@ for i=1:length(pi_t)
     sol = optimize(Constraints, Objective, options);
 
     % This is the value of pi_t_plus_one
-    
-    % disp(value(var_pi))
     pi_t_plus_one(i) = value(var_pi);
     
 end
 
-% disp(pi_t_plus_one)
-% This code is to print the convex polytopic set
-% theta = sdpvar(3,1);
-% plot(PI_theta * theta <= pi_t)
-% con2vert(PI_theta,pi_t)
-
-
-
-% after computing pi_t_plus_one plot it:
-% plot(PI_theta * theta <= (pi_t_plus_one)')
-
-
-% computes vertices of polytope given H-form polytope
-% con2vert(PI_theta,(pi_t_plus_one)')
 end
