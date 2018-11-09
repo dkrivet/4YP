@@ -75,4 +75,4 @@ end
 H = C' * Q_bar * C + R_bar;
 f_transpose = x_k' * M' * Q_bar * C;
 
-
+end

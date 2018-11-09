@@ -15,13 +15,13 @@ B2 = [0;0];
 B3 = [0.0397;0.059];
 
 % initial condition:
-x_t_1 = [3; 6];
+x_t = [3; 6];
 
 % next state of t
-x_t = [2.9; 3.2];
+% x_t = [2.9; 3.2];
 
 % initial control input
-u_t_1 = -1;  
+% u_t_1 = -1;  
 
 % define sets for system parameters and distrubance
 PI_theta = [1 0 0;0 1 0;0 0 1;-1 0 0;0 -1 0;0 0 -1];
@@ -48,8 +48,8 @@ V = [V; 0 -3.33]; % V is 9 x 2
 
 % Calculate H_c and K, and lambda using lemma7():
 [H_c, K, lambda] = lemma7(A0, A1, A2, A3, B0, B1, B2, B3, PI_theta, pi_t, F, G, V);
-%size(H_c)
-display(value(K))
+% size(H_c)
+% display(value(K))
 
 % Calculate H_1_hat, ..., H_n_alpha_hat by using lemma8():
 H_hat = lemma8(PI_theta, pi_t, A0, A1, A2, A3, B0, B1, B2, B3, K, V);
@@ -69,20 +69,22 @@ R = 1;
 % Offline section done! 
 
 %% Online Section of the Proposed Algorithm 
-plot(x_t_1(1),x_t_1(2),'o','MarkerSize',5)
+plot(x_t(1),x_t(2),'o','MarkerSize',5)
 hold on 
+theta = sdpvar(3,1);
 
 vertices = compute_vertices(PI_theta,pi_t);
 for i = 1:10
     % Do the parameter set update with this function to get pi_t_plus_one
     % gives infeasible or unbounded model after several iterations
     if i ~= 1
-        pi_t_plus_one = parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x_t_2,optimal_control_input,x_t_1,PI_theta,PI_w,pi_t,pi_w);
+        pi_t_plus_one = parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x_t_1,optimal_control_input,x_t,PI_theta,PI_w,pi_t,pi_w);
         % calculate vertices of the newly updated parameter set:
         vertices = compute_vertices(PI_theta,(pi_t_plus_one)');
-    end 
+    end
     
-
+    
+    vertices
     % update lambda_t:
     % lambda_t = update_lambda_t(vertices, H_hat);
     % disp(lambda_t)
@@ -90,7 +92,7 @@ for i = 1:10
     % compute the optimal solution:
     theta_hat = [0 0 0];
     theta_hat_transpose = [ones(length(vertices(:,1)),1) vertices];
-    [optimal_cost, optimal_control_input] = compute_optimal_solution(A0, A1, A2, A3, B0, B1, B2, B3, N, H_c, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x_t_1, theta_hat);
+    [optimal_cost, optimal_control_input] = compute_optimal_solution(A0, A1, A2, A3, B0, B1, B2, B3, N, H_c, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x_t, theta_hat);
 
     % disp(H_hat)
     % disp(H_Q)
@@ -100,13 +102,12 @@ for i = 1:10
     % disp(optimal_cost)
     
     % x_t_1 = x_t;
-    x_t_2 = x_t_1;
-    
+    x_t_1 = x_t;
     theta_used_to_update_state = [0 0 0];
     [A_theta, B_theta] = calculate_AandB_theta_j(B0,B1,B2,B3,A0,A1,A2,A3,theta_used_to_update_state);
-    x_t_1 = A_theta * x_t_1 + B_theta * optimal_cost + [0.05;0.05];
+    x_t = A_theta * x_t + B_theta * optimal_cost + [randi([0 1000])/10000;randi([0 1000])/10000];
     
-    plot(x_t_1(1),x_t_1(2),'o','MarkerSize',5)
+    plot(x_t(1),x_t(2),'o','MarkerSize',5)
 end
 time_elapsed = toc
 end 
