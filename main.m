@@ -105,7 +105,7 @@ for i = 1:10
     x_t_1 = x_t;
     theta_used_to_update_state = [0 0 0];
     [A_theta, B_theta] = calculate_AandB_theta_j(B0,B1,B2,B3,A0,A1,A2,A3,theta_used_to_update_state);
-    x_t = A_theta * x_t + B_theta * optimal_cost + [randi([0 1000])/10000;randi([0 1000])/10000];
+    x_t = A_theta * x_t + B_theta * optimal_control_input + [randi([0 1000])/10000;randi([0 1000])/10000];
     
     plot(x_t(1),x_t(2),'o','MarkerSize',5)
 end

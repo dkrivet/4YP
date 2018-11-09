@@ -17,8 +17,8 @@ var_pi = sdpvar(1);
 
 
 % set options for solver
-% options = sdpsettings('solver','gurobi');
-options = sdpsettings('solver','gurobi','verbose',0);
+options = sdpsettings('solver','gurobi');
+% options = sdpsettings('solver','gurobi','verbose',0);
 
 for i=1:length(pi_t)
     % set constraints
