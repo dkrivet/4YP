@@ -46,11 +46,11 @@ if n > 1
         end
       end
     end
-    fprintf(1,'k:%d r:%d r*(r-1):%d rows added:%d discarded:%d zero:%d\n',k,r,r*(r-1),row_count-r,disc_count,norm_count);
+    % fprintf(1,'k:%d r:%d r*(r-1):%d rows added:%d discarded:%d zero:%d\n',k,r,r*(r-1),row_count-r,disc_count,norm_count);
     V = Vnew(1:row_count,:);
   end
 end
-fprintf(1,'total rows:%d\n',size(V,1));
+% fprintf(1,'total rows:%d\n',size(V,1));
 
 if nargout > 1
   theta = zeros(size(V,1),1); 
