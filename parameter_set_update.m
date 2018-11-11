@@ -12,28 +12,36 @@ Q_t = pi_w + PI_w *d_t;
 % pi_t_plus_one of length 2p x 1
 
 % set YALMIP decision variables
-H_i = sdpvar(1,10);
-var_pi = sdpvar(1);
+H_i_1 = sdpvar(1,10);
+H_i_2 = sdpvar(1,10);
+var_pi_1 = sdpvar(1);
+var_pi_2 = sdpvar(1);
 
 
 % set options for solver
-options = sdpsettings('solver','gurobi');
-% options = sdpsettings('solver','gurobi','verbose',0);
+% options = sdpsettings('solver','gurobi');
+options = sdpsettings('solver','gurobi','verbose',0);
 
-for i=1:length(pi_t)
+for i=1:length(pi_t)/2
     % set constraints
-    Constraints = [H_i * [PI_theta; P_t] == PI_theta(i,:), H_i * [pi_t; Q_t] <= var_pi, H_i >= 0];
+    Constraints = [H_i_1 * [PI_theta; P_t] == PI_theta(i,:), 
+        H_i_2 * [PI_theta; P_t] == PI_theta(i+3,:), 
+        H_i_1 * [pi_t; Q_t] <= var_pi_1, 
+        H_i_2 * [pi_t; Q_t] <= var_pi_2,
+        H_i_1 >= 0, 
+        H_i_2 >= 0];
 
 
     % set objective that we want to minimize 
-    Objective = var_pi;
+    Objective = var_pi_1 + var_pi_2;
 
     % Solve the optimization
-    % sol = optimize([Constraints, -1000<= var_pi <= 1000], Objective);
+    % sol = optimize([Constraints, -1000<= var_pi_1 <= 1000, -1000<= var_pi_2 <= 1000], Objective);
     sol = optimize(Constraints, Objective, options);
 
     % This is the value of pi_t_plus_one
-    pi_t_plus_one(i) = value(var_pi);
+    pi_t_plus_one(i) = value(var_pi_1);
+    pi_t_plus_one(i+3) = value(var_pi_2);
     
 end
 
