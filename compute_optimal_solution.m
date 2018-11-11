@@ -40,7 +40,7 @@ for i = 1:length(V(:,1))
     end
 end
 
-Constraints = [Constraints, alpha_k(1) >= V * x_k];
+Constraints = [Constraints, alpha_k(:,1) >= V * x_k];
 Constraints = [Constraints, H_c * alpha_k(:,N+1) <= ones(size(H_c * alpha_k(:,N+1)))];
 
 for i = 1:length(V(:,1))
