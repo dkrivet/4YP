@@ -1,6 +1,7 @@
 function pi_t_plus_one = parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x_t_1,u_t_1,x_t,PI_theta,PI_w,pi_t,pi_w)
 
-D = [(A1 * x_t_1+ B1* u_t_1) (A2 * x_t_1+ B2* u_t_1) (A3 * x_t_1+ B3* u_t_1)];
+% D = [(A1 * x_t_1+ B1* u_t_1) (A2 * x_t_1+ B2* u_t_1) (A3 * x_t_1+ B3* u_t_1)];
+D = compute_D_of_x_and_u(A1, A2, A3, B1, B2, B3, x_t_1, u_t_1);
 P_t = -PI_w * D;
 
 d_t = A0 * x_t_1 + B0 * u_t_1 - x_t;
