@@ -75,7 +75,7 @@ theta = sdpvar(3,1);
 x = sdpvar(2,1);
 
 vertices = compute_vertices(PI_theta,pi_t);
-for i = 1:2000
+for i = 1:10
     i
     % Do the parameter set update with this function to get pi_t_plus_one
     % gives infeasible or unbounded model after several iterations
@@ -87,7 +87,7 @@ for i = 1:2000
         pi_t = pi_t_plus_one';
     end
     
-    vertices
+    % vertices
 %     if i ~= 1
 %         pi_t_plus_one
 %     end
