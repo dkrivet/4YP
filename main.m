@@ -77,13 +77,20 @@ previous_point_estimate = [0 0 0]';
 
 % Compute initial value of vertices for parameter set THETA_0
 vertices = compute_vertices(PI_theta,pi_t);
-for i = 1:30
+
+% mu = compute_mu(A1, A2, A3, B1, B2, B3);
+mu = 0.1;
+
+% initial condition for point estimate
+current_point_estimate = [0 0 0];
+
+for i = 1:5000
     i
     % Do the parameter set update with this function to get pi_t_plus_one
     if i ~= 1
         pi_t_plus_one = parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x_t_1,optimal_control_input,x_t,PI_theta,PI_w,pi_t,pi_w);
         % calculate vertices of the newly updated parameter set:
-        vertices = compute_vertices(PI_theta,(pi_t_plus_one)');
+        vertices = compute_vertices(PI_theta,(pi_t_plus_one)')
         % update the value of pi_t
         pi_t = pi_t_plus_one';
     end
@@ -97,25 +104,27 @@ for i = 1:30
     if i ~= 1
         u_k_1 = optimal_control_input;
     end
+
     
-    % compute the optimal solution:
-    theta_hat = [0 0 0];
-    theta_hat_transpose = [ones(length(vertices(:,1)),1) vertices];
-    [optimal_cost, optimal_control_input, alpha_k_0] = compute_optimal_solution(A0, A1, A2, A3, B0, B1, B2, B3, N, H_c, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x_t, theta_hat);
-
-
     % Calculate point estimate
     if i ~= 1
-        % point_estimate currently assumes constant mu, needs to be fixed
-        current_point_estimate = point_estimate(A0, A1, A2, A3, B0, B1, B2, B3, x_t, x_t_1, optimal_control_input, u_k_1, previous_point_estimate, PI_theta, pi_t);
+        current_point_estimate = point_estimate(A0, A1, A2, A3, B0, B1, B2, B3, x_t, x_t_1, optimal_control_input, u_k_1, previous_point_estimate, PI_theta, pi_t, mu)
         previous_point_estimate = current_point_estimate;
     end
+    
+    
+    
+    % compute the optimal solution:
+    theta_hat_transpose = [ones(length(vertices(:,1)),1) vertices];
+    [optimal_cost, optimal_control_input, alpha_k_0] = compute_optimal_solution(A0, A1, A2, A3, B0, B1, B2, B3, N, H_c, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x_t, current_point_estimate);
+
     
     % Store current value of state into the old value of state (update
     % value of old state)
     x_t_1 = x_t;
-    % Update the state using the computed optimal control input
-    theta_used_to_update_state = [0 0 0];
+    % Update the state using the computed optimal control input and true
+    % parameter value
+    theta_used_to_update_state = [0.8 0.2 -0.5];
     [A_theta, B_theta] = calculate_AandB_theta_j(B0,B1,B2,B3,A0,A1,A2,A3,theta_used_to_update_state);
     x_t = A_theta * x_t + B_theta * optimal_control_input + [(randi([0 2000])-1000)/10000;(randi([0 2000])-1000)/10000];
     
