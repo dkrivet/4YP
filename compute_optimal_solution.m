@@ -25,7 +25,7 @@ Objective = v_k' * H * v_k + 2 * f_transpose * v_k;
 % define constraints:
 Constraints = [];
 for i = 1:N
-    Constraints = [Constraints, H_c * alpha_k(:,i) + G * v_k(i) <= ones(2,1)];
+    Constraints = [Constraints, H_c * alpha_k(:,i) + G * v_k(i) <= ones(size(G))];
 end
 
 % ask about this line. Probably not right to just say alpha_k_plus_one is a
