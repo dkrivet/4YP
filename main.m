@@ -30,8 +30,11 @@ pi_t = [1; 1; 1; 1; 1; 1];
 pi_w = [0.1; 0.1; 0.1; 0.1];
 
 % define F and G matrices to satisfy constraints on state and input
-F = [0 -3.33; 0 0];
-G = [0; 1];
+% F = [0 -3.33; 0 0];
+% G = [0; 1];
+F = [1/100 0; -1/100 0; 0 -10/3; 0 1/100; 0 0; 0 0];
+G = [0; 0; 0; 0; 1; -1];
+
 
 %% Offline Section of the Proposed Algorithm 
 % Offline: given an initial parameter set estimate THETA_0, choose V and
@@ -74,7 +77,7 @@ previous_point_estimate = [0 0 0]';
 
 % Compute initial value of vertices for parameter set THETA_0
 vertices = compute_vertices(PI_theta,pi_t);
-for i = 1:10
+for i = 1:30
     i
     % Do the parameter set update with this function to get pi_t_plus_one
     if i ~= 1
