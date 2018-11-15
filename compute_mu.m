@@ -1,25 +1,31 @@
-function mu = compute_mu(A1, A2, A3, B1, B2, B3, F, G)
+function mu = compute_mu(A1, A2, A3, B1, B2, B3)
 
-% set YALMIP decision variables 
-x = sdpvar(2,1);
-u = sdpvar(1);
+gray_code = [1 1 1;1 1 2; 1 2 1; 1 2 2; 2 1 1;2 1 2; 2 2 1; 2 2 2];
 
-% options = sdpsettings('solver','gurobi');
-% options = sdpsettings('solver','gurobi','verbose',0);
+x1 = [-100 100];
+x2 = [-0.3 100];
+u = [-1 1];
 
-% set objective
-D = [(A1 * x + B1 * u) (A2 * x + B2 * u) (A3 * x + B3 * u)];
-% test = @(x,u) [(A1*x+B1*u)'*(A1*x+B1*u) (A1*x+B1*u)'*(A2*x+B2*u) (A1*x+B1*u)'*(A3*x+B3*u);(A2*x+B2*u)'*(A1*x+B1*u) (A2*x+B2*u)'*(A2*x+B2*u) (A2*x+B2*u)'*(A3*x+B3*u);(A3*x+B3*u)'*(A1*x+B1*u) (A3*x+B3*u)'*(A2*x+B2*u) (A3*x+B3*u)'*(A3*x+B3*u)];
-% max_eig_value = max(eig(test(x_opt,u_opt)));
-% Objective = -max_eig_value; 
-Objective = -norm(D);
-% set constraints
-Constraints = [F * x + G * u <= ones(2,1)];
+for i =1:length(gray_code(:,1))
+    vertices(i,:) = [x1(gray_code(i,1)) x2(gray_code(i,2)) u(gray_code(i,3))];
+end
 
-% solve the optimization
-sol = optimize(Constraints, Objective);
+% each row of vertices containt [x1_i x2_i u_i]
 
+lambda_bar = 0;
 
-mu = value(norm(D));
-% mu = 1/(-max(eig(D' * D)));
+for i =1:length(vertices(:,1))
+    x = [vertices(i,1); vertices(i,2)];
+    u = vertices(i,3);
+    D = compute_D_of_x_and_u(A1, A2, A3, B1, B2, B3, x, u);
+    temp = max(eig(D' * D));
+    if temp > lambda_bar
+        lambda_bar = temp;
+    end
+end
+
+mu = 1/lambda_bar;
+
+end
+    
 
