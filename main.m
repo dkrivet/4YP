@@ -52,6 +52,7 @@ V = [V; 0 -3.33]; % V is 9 x 2
 % Calculate H_c and K, and lambda using lemma7():
 [H_c, K, lambda] = lemma7(A0, A1, A2, A3, B0, B1, B2, B3, PI_theta, pi_t, F, G, V);
 
+
 % Calculate H_1_hat, ..., H_n_alpha_hat by using lemma8():
 H_hat = lemma8(PI_theta, pi_t, A0, A1, A2, A3, B0, B1, B2, B3, K, V);
 % Access elements of H_hat by using H_hat{i}
@@ -66,11 +67,13 @@ R = 1;
 % Offline section done! 
 
 %% Online Section of the Proposed Algorithm 
+state_evolution = figure;
+state_sum = figure;
+
 % Plot initial state
+figure(state_evolution);
 plot(x_t(1),x_t(2),'o','MarkerSize',5)
 hold on 
-
-x = sdpvar(2,1);
 
 % Initialise theta_hat_0 inTHETA_0
 previous_point_estimate = [0 0 0]';
@@ -78,14 +81,23 @@ previous_point_estimate = [0 0 0]';
 % Compute initial value of vertices for parameter set THETA_0
 vertices = compute_vertices(PI_theta,pi_t);
 
-% mu = compute_mu(A1, A2, A3, B1, B2, B3);
-mu = 0.1;
+mu = compute_mu(A1, A2, A3, B1, B2, B3);
+% mu = 0.1;
+% mu = 0.4;
 
 % initial condition for point estimate
 current_point_estimate = [0 0 0];
 
-for i = 1:5000
+% create sum for states
+sum_of_states = 0;
+
+x = sdpvar(2,1);
+for i = 1:500
     i
+    sum_of_states = sum_of_states + norm(x_t)^2;
+    figure(state_sum);
+    hold on
+    plot(i,sum_of_states,'x','MarkerSize',5)
     % Do the parameter set update with this function to get pi_t_plus_one
     if i ~= 1
         pi_t_plus_one = parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x_t_1,optimal_control_input,x_t,PI_theta,PI_w,pi_t,pi_w);
@@ -108,7 +120,7 @@ for i = 1:5000
     
     % Calculate point estimate
     if i ~= 1
-        current_point_estimate = point_estimate(A0, A1, A2, A3, B0, B1, B2, B3, x_t, x_t_1, optimal_control_input, u_k_1, previous_point_estimate, PI_theta, pi_t, mu)
+        current_point_estimate = point_estimate(A0, A1, A2, A3, B0, B1, B2, B3, x_t, x_t_1, u_k_1, previous_point_estimate, PI_theta, pi_t, mu)
         previous_point_estimate = current_point_estimate;
     end
     
@@ -116,7 +128,7 @@ for i = 1:5000
     
     % compute the optimal solution:
     theta_hat_transpose = [ones(length(vertices(:,1)),1) vertices];
-    [optimal_cost, optimal_control_input, alpha_k_0] = compute_optimal_solution(A0, A1, A2, A3, B0, B1, B2, B3, N, H_c, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x_t, current_point_estimate);
+    [optimal_cost, optimal_control_input, alpha_k_1] = compute_optimal_solution(A0, A1, A2, A3, B0, B1, B2, B3, N, H_c, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x_t, current_point_estimate);
 
     
     % Store current value of state into the old value of state (update
@@ -126,10 +138,16 @@ for i = 1:5000
     % parameter value
     theta_used_to_update_state = [0.8 0.2 -0.5];
     [A_theta, B_theta] = calculate_AandB_theta_j(B0,B1,B2,B3,A0,A1,A2,A3,theta_used_to_update_state);
-    x_t = A_theta * x_t + B_theta * optimal_control_input + [(randi([0 2000])-1000)/10000;(randi([0 2000])-1000)/10000];
+    w_t = [(randi([0 2000])-1000)/10000;(randi([0 2000])-1000)/10000];
+    x_t = A_theta * x_t + B_theta * optimal_control_input + w_t;
     
     % Plot the newly computed state
+    figure(state_evolution);
+    plot(V*x<= alpha_k_1)
     plot(x_t(1),x_t(2),'o','MarkerSize',5)
+
+    
+    
 end
 % Title and labels for graph
 title('Model Predictive Controller')
