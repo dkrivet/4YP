@@ -11,10 +11,11 @@ PHI = A_hat + B_hat * K;
 
 
 % Create M matrix
-M = ones(2 * N,2);
-for i = 1:2:2 * N
-    M(i:i+1,:) = PHI ^ i;
-end
+% M = ones(2 * N,2);
+% for i = 1:2:2 * N
+%     M(i:i+1,:) = PHI ^ (ceil(i/2));
+% end
+M = create_M_matrix(N, PHI);
 
 % Create C matrix
 a = zeros(2,1);
