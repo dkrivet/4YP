@@ -67,14 +67,14 @@ R = 1;
 % Offline section done! 
 
 %% Online Section of the Proposed Algorithm 
-%state_evolution = figure;
-%state_sum = figure;
-%parameter_set = figure;
+state_evolution = figure;
+state_sum = figure;
+parameter_set = figure;
 
 % Plot initial state
-%figure(state_evolution);
-%plot(x_t(1),x_t(2),'o','MarkerSize',5)
-%hold on 
+figure(state_evolution);
+plot(x_t(1),x_t(2),'o','MarkerSize',5)
+hold on 
 
 % Initialise theta_hat_0 inTHETA_0
 previous_point_estimate = [0 0 0]';
@@ -84,7 +84,7 @@ vertices = compute_vertices(PI_theta,pi_t);
 
 %mu = compute_mu(A1, A2, A3, B1, B2, B3);
 % mu = 0.1;
-mu = 0.4;
+mu = 1;
 
 % initial condition for point estimate
 current_point_estimate = [0 0 0];
@@ -93,19 +93,20 @@ current_point_estimate = [0 0 0];
 sum_of_states = 0;
 
 x = sdpvar(2,1);
-for i = 1:5000
+for i = 1:30
     i
-    %sum_of_states = sum_of_states + norm(x_t)^2;
-    %figure(state_sum);
-    %hold on
-    %plot(i,sum_of_states,'x','MarkerSize',5)
+    sum_of_states = sum_of_states + norm(x_t)^2;
+    figure(state_sum);
+    hold on
+    plot(i,sum_of_states,'x','MarkerSize',5)
+    
     % Do the parameter set update with this function to get pi_t_plus_one
     if i ~= 1
-        pi_t_plus_one = parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x_t_1,optimal_control_input,x_t,PI_theta,PI_w,pi_t,pi_w);
+        %pi_t_plus_one = parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x_t_1,optimal_control_input,x_t,PI_theta,PI_w,pi_t,pi_w);
         % calculate vertices of the newly updated parameter set:
-        vertices = compute_vertices(PI_theta,(pi_t_plus_one)')
+        %vertices = compute_vertices(PI_theta,(pi_t_plus_one)')
         % update the value of pi_t
-        pi_t = pi_t_plus_one';
+        %pi_t = pi_t_plus_one';
     end
     
     
@@ -143,9 +144,9 @@ for i = 1:5000
     x_t = A_theta * x_t + B_theta * optimal_control_input + w_t;
     
     % Plot the newly computed state
-    %figure(state_evolution);
-    % plot(V*x<= alpha_k_1)
-    %plot(x_t(1),x_t(2),'o','MarkerSize',5)
+    figure(state_evolution);
+    plot(V*x<= alpha_k_1)
+    plot(x_t(1),x_t(2),'o','MarkerSize',5)
 
     
     
@@ -157,8 +158,13 @@ ylabel('x2')
 
 % Plot terminal parameter set
 theta = sdpvar(3,1);
-%figure(parameter_set);
-%plot(PI_theta * theta <= pi_t)
+figure(parameter_set);
+subplot(2,1,1);
+plot(PI_theta * theta <= ones(6,1))
+axis([-1 1 -1 1 -1 1])
+subplot(2,1,2);
+plot(PI_theta * theta <= pi_t)
+axis([-1 1 -1 1 -1 1])
 
 
 time_elapsed = toc
