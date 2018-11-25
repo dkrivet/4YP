@@ -1,4 +1,4 @@
-function [optimal_cost, optimal_control_input, alpha_k_1] = compute_optimal_solution(A0, A1, A2, A3, B0, B1, B2, B3, N, H_c, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x_k, theta_hat)
+function [optimal_cost, optimal_control_input, alpha_k_1, predicted_v] = compute_optimal_solution(A0, A1, A2, A3, B0, B1, B2, B3, N, H_c, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x_k, theta_hat)
 
 m = length(vertices(:,1));
 % use compute_w_bar to get the value of w_bar for use later on:
@@ -65,6 +65,8 @@ optimal_control_input = value(K * x_k + v_k(1));
 % x(isnan(x)) = 0;
 % alpha_k_0 = x;
 alpha_k_1 = value(alpha_k(:,2));
+
+predicted_v = value(v_k);
 
 % value(H_c * alpha_k(:,10) + G * value(v_k(10,1)))
 
