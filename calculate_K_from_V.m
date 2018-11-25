@@ -19,7 +19,7 @@ H_hat = sdpvar((p + 1)*ones(1,n_alpha),n_alpha * ones(1,n_alpha));
 Constraints = [];
 for i = 1:n_alpha
     for j = 1: length(vertices(:,1))
-        Constraints = [Constraints, lambda >= theta_hat_transpose(j,:) * H_hat{i} * ones(9,1), theta_hat_transpose(j,:) * H_hat{i} >= 0];
+        Constraints = [Constraints, lambda >= theta_hat_transpose(j,:) * H_hat{i} * ones(size(V(:,1))), theta_hat_transpose(j,:) * H_hat{i} >= 0];
     end
 end 
 
