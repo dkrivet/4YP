@@ -58,10 +58,11 @@ V = [V; 0 -10/3];
 % bla = sdpvar(2,1);
 % plot(V * bla <= ones(length(V(:,1)),1));
 alpha_bar = calculate_alpha_bar(V);
-indeces = rows_of_V_to_delete(alpha_bar)
+indeces = rows_of_V_to_delete(alpha_bar);
 V(indeces,:) = [];
 tube_verts = con2vert(V, ones(length(V(:,1)),1));
-R_j = compute_R_j(V, tube_verts, ones(length(V(:,1)),1))
+R_j = compute_R_j(V, tube_verts, ones(length(V(:,1)),1));
+U_j = calculate_U_j(R_j, V);
 
 
 
@@ -150,6 +151,7 @@ for i = 1:30
     % compute the optimal solution:
     theta_hat_transpose = [ones(length(vertices(:,1)),1) vertices];
     [optimal_cost, optimal_control_input, alpha_k_current, alpha_k_1, predicted_v] = compute_optimal_solution(A0, A1, A2, A3, B0, B1, B2, B3, N, H_c, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x_t, current_point_estimate);
+    % [optimal_cost, optimal_control_input, alpha_k_current, alpha_k_1, predicted_v] = compute_optimal_solution_V_form(A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x_t, current_point_estimate, 6, U_j, H_c);
     % optimal_cost
     
 %     [predicted_state, predicted_input] = compute_predicted_state_and_input(predicted_v, K, x_t, N, current_point_estimate, A0, A1, A2, A3, B0, B1, B2, B3);
