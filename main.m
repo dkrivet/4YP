@@ -123,7 +123,7 @@ for i = 1:30
         pi_t_plus_one = parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x_t_1,optimal_control_input,x_t,PI_theta,PI_w,pi_t,pi_w);
         % calculate vertices of the newly updated parameter set:
         % remove semicolon at end of next line to output vertices 
-        vertices = compute_vertices(PI_theta,(pi_t_plus_one)');
+        vertices = compute_vertices(PI_theta,(pi_t_plus_one)')
         % update the value of pi_t
         pi_t = pi_t_plus_one';
     end
@@ -142,7 +142,7 @@ for i = 1:30
     % Calculate point estimate
     if i ~= 1
         % remove semicolon at end of line to output current point estimate
-        current_point_estimate = point_estimate(A0, A1, A2, A3, B0, B1, B2, B3, x_t, x_t_1, u_k_1, previous_point_estimate, PI_theta, pi_t, mu);
+        current_point_estimate = point_estimate(A0, A1, A2, A3, B0, B1, B2, B3, x_t, x_t_1, u_k_1, previous_point_estimate, PI_theta, pi_t, mu)
         previous_point_estimate = current_point_estimate;
     end
     
@@ -151,8 +151,7 @@ for i = 1:30
     % compute the optimal solution:
     theta_hat_transpose = [ones(length(vertices(:,1)),1) vertices];
     [optimal_cost, optimal_control_input, alpha_k_current, alpha_k_1, predicted_v] = compute_optimal_solution(A0, A1, A2, A3, B0, B1, B2, B3, N, H_c, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x_t, current_point_estimate);
-    % [optimal_cost, optimal_control_input, alpha_k_current, alpha_k_1, predicted_v] = compute_optimal_solution_V_form(A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x_t, current_point_estimate, 6, U_j, H_c);
-    % optimal_cost
+    % [optimal_cost, optimal_control_input, alpha_k_current, alpha_k_1, predicted_v] = compute_optimal_solution_V_form(A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x_t, current_point_estimate, 6, U_j, H_c, PI_theta, pi_t);
     
 %     [predicted_state, predicted_input] = compute_predicted_state_and_input(predicted_v, K, x_t, N, current_point_estimate, A0, A1, A2, A3, B0, B1, B2, B3);
 %     bool_matrix = persistent_excitation_check(predicted_state, predicted_input, A1, A2, A3, B1, B2, B3, 0.01)
