@@ -1,4 +1,4 @@
-function [optimal_cost, optimal_control_input, alpha_k_current, alpha_k_1, predicted_v] = compute_optimal_solution_V_form(A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x_k, theta_hat, number_of_vertices, U_j, H_c)
+function [optimal_cost, optimal_control_input, alpha_k_current, alpha_k_1, predicted_v] = compute_optimal_solution_V_form(A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x_k, theta_hat, number_of_vertices, U_j, H_c, PI_theta, pi_theta)
 
 m = length(vertices(:,1));
 % use compute_w_bar to get the value of w_bar for use later on:
@@ -10,6 +10,12 @@ v_k = sdpvar(N,1);
 % the way this is defined, the columns of alpha_k make up alpha(0|k),
 % alpha(1|k) , ... , alpha (N-1|k)
 alpha_k = sdpvar(length(V(:,1)),N+1); % dimensions of 9 x 11
+
+for i = 1:N
+    for j = 1:number_of_vertices
+        Lambda{i}{j} = sdpvar(6,6,'full');
+    end
+end
 
 
 
@@ -49,7 +55,11 @@ end
 
 for i = 1:N
     for j = 1:number_of_vertices
-        Constraints = [Constraints, LAMBDA
+        Constraints = [Constraints, Lambda{i}{j} * PI_theta == V * compute_D_of_x_and_u(A1, A2, A3, B1, B2, B3, U_j{j} * alpha_k(:,i), K * U_j{j} * alpha_k(:,i) + v_k(i))];
+        Constraints = [Constraints, Lambda{i}{j} >= 0];
+        Constraints = [Constraints, Lambda{i}{j} * pi_theta <= alpha_k(:,i+1) - V * compute_little_d_of_x_and_u(A0, B0, U_j{j} * alpha_k(:,i), K * U_j{j} * alpha_k(:,i) + v_k(i)) - w_bar'];
+    end
+end
 
 
 
