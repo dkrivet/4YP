@@ -1,4 +1,4 @@
-function [optimal_cost, optimal_control_input, alpha_k_current, alpha_k_1, predicted_v] = compute_optimal_solution_V_form(A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x_k, theta_hat, number_of_vertices, U_j, H_c, PI_theta, pi_theta)
+function [optimal_cost, optimal_control_input, alpha_k_current, alpha_k_1, predicted_v] = compute_optimal_solution_V_form(A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, V, PI_w, pi_w, vertices, K, R, Q, x_k, number_of_vertices, U_j, PI_theta, pi_theta, theta_hat)
 
 m = length(vertices(:,1));
 % use compute_w_bar to get the value of w_bar for use later on:
@@ -22,8 +22,7 @@ end
 
 % need to figure out which value of x_k to use here, current value, or next
 % value
-% [H, f_transpose] = construct_cost_matrices(A0, A1, A2, A3, B0, B1, B2, B3, K, N, R, Q, x_k, theta_hat);
-[H, f_transpose] = construct_cost_matrices(A0, A1, A2, A3, B0, B1, B2, B3, K, N, R, Q, x_k, [0 0 0]);
+[H, f_transpose] = construct_cost_matrices(A0, A1, A2, A3, B0, B1, B2, B3, K, N, R, Q, x_k, theta_hat);
 % define objective here ...
 Objective = v_k' * H * v_k + 2 * f_transpose * v_k;
 
@@ -36,7 +35,7 @@ Constraints = [];
 % end
 for j = 1:number_of_vertices
     for i = 1:N
-        Constraints = [Constraints, (F + G * K) * U_j{j} * alpha_k(:,i) + G * v_k(i)];
+        Constraints = [Constraints, (F + G * K) * U_j{j} * alpha_k(:,i) + G * v_k(i) <= ones(size(G))];
     end
 end
 
@@ -92,7 +91,7 @@ end
 
 
 % set solver options
-options = sdpsettings('solver','gurobi','verbose',1);
+options = sdpsettings('solver','gurobi','verbose',0);
 % options = sdpsettings('solver','gurobi');
 
 % solve the optimization
