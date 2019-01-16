@@ -11,9 +11,9 @@ v_k = sdpvar(N,1);
 % alpha(1|k) , ... , alpha (N-1|k)
 alpha_k = sdpvar(length(V(:,1)),N+1); % dimensions of 9 x 11
 
-for i = 1:N
+for i = 1:N+1
     for j = 1:number_of_vertices
-        Lambda{i}{j} = sdpvar(6,6,'full');
+        Lambda{i}{j} = sdpvar(length(V(:,1)),6,'full');
     end
 end
 
@@ -22,7 +22,8 @@ end
 
 % need to figure out which value of x_k to use here, current value, or next
 % value
-[H, f_transpose] = construct_cost_matrices(A0, A1, A2, A3, B0, B1, B2, B3, K, N, R, Q, x_k, theta_hat);
+% [H, f_transpose] = construct_cost_matrices(A0, A1, A2, A3, B0, B1, B2, B3, K, N, R, Q, x_k, theta_hat);
+[H, f_transpose] = construct_cost_matrices(A0, A1, A2, A3, B0, B1, B2, B3, K, N, R, Q, x_k, [0 0 0]);
 % define objective here ...
 Objective = v_k' * H * v_k + 2 * f_transpose * v_k;
 
@@ -70,16 +71,28 @@ end
 
 
 Constraints = [Constraints, alpha_k(:,1) >= V * x_k];
-Constraints = [Constraints, H_c * alpha_k(:,N+1) <= ones(size(H_c * alpha_k(:,N+1)))];
-
-for i = 1:length(V(:,1))
-    for j = 1:m
-        Constraints = [Constraints, alpha_k(i,N+1) >= theta_hat_transpose(j,:) * H_hat{i} * alpha_k(:,N+1) + w_bar(i)];
-    end
+% Constraints = [Constraints, H_c * alpha_k(:,N+1) <= ones(size(H_c * alpha_k(:,N+1)))];
+for j = 1:number_of_vertices
+    Constraints = [Constraints, (F + G * K) * U_j{j} * alpha_k(:,N+1) <= 1];
 end
 
+
+% for i = 1:length(V(:,1))
+%     for j = 1:m
+%         Constraints = [Constraints, alpha_k(i,N+1) >= theta_hat_transpose(j,:) * H_hat{i} * alpha_k(:,N+1) + w_bar(i)];
+%     end
+% end
+for j = 1:number_of_vertices
+    Constraints = [Constraints, Lambda{N+1}{j} * PI_theta == V * compute_D_of_x_and_u(A1, A2, A3, B1, B2, B3, U_j{j} * alpha_k(:,N+1), K * U_j{j} * alpha_k(:,N+1))];
+    Constraints = [Constraints, Lambda{N+1}{j} * pi_theta <= alpha_k(:,N+1) - V * compute_little_d_of_x_and_u(A0, B0, U_j{j} * alpha_k(:,N+1), K * U_j{j} * alpha_k(:,N+1)) - w_bar'];
+    Constraints = [Constraints, Lambda{N+1}{j} >= 0];
+end
+    
+
+
+
 % set solver options
-options = sdpsettings('solver','gurobi','verbose',0);
+options = sdpsettings('solver','gurobi','verbose',1);
 % options = sdpsettings('solver','gurobi');
 
 % solve the optimization
