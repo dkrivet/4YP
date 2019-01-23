@@ -1,4 +1,4 @@
-function [optimal_cost, optimal_control_input, alpha_k_current, alpha_k_1, predicted_v] = compute_optimal_solution_V_form(A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, V, PI_w, pi_w, vertices, K, R, Q, x_k, number_of_vertices, U_j, PI_theta, pi_theta, theta_hat)
+function [optimal_cost, optimal_control_input, alpha_k_current, alpha_k_1, predicted_v, sol] = compute_optimal_solution_V_form(A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, V, PI_w, pi_w, vertices, K, R, Q, x_k, number_of_vertices, U_j, PI_theta, pi_theta, theta_hat)
 
 m = length(vertices(:,1));
 % use compute_w_bar to get the value of w_bar for use later on:
@@ -91,7 +91,7 @@ end
 
 
 % set solver options
-options = sdpsettings('solver','gurobi','verbose',0);
+options = sdpsettings('solver','gurobi','verbose',0, 'cachesolvers', 1);
 % options = sdpsettings('solver','gurobi');
 
 % solve the optimization
