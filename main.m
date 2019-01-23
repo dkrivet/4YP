@@ -45,7 +45,8 @@ G = [0; 0; 0; 0; 1; -1];
 % creates a V matrix with dimensions 2^5 x 2
 V = generate_polytope3(2, 5);
 % Take first 8 rows of V
-V = V(10:17,:);
+%V = V(10:17,:);
+V = V(1:8,:);
 % append row of F that corresponds to row of 0s in G
 %V = [V; F(1:4,:)];
 %size(V) % V is 9 x 2
@@ -63,7 +64,7 @@ V(indeces,:) = [];
 tube_verts = con2vert(V, ones(length(V(:,1)),1));
 R_j = compute_R_j(V, tube_verts, ones(length(V(:,1)),1));
 U_j = calculate_U_j(R_j, V);
-size(V)
+
 
 
 
@@ -72,7 +73,7 @@ size(V)
 
 
 % Calculate H_1_hat, ..., H_n_alpha_hat by using lemma8():
-H_hat = lemma8(PI_theta, pi_t, A0, A1, A2, A3, B0, B1, B2, B3, K, V);
+% H_hat = lemma8(PI_theta, pi_t, A0, A1, A2, A3, B0, B1, B2, B3, K, V);
 % Access elements of H_hat by using H_hat{i}
 
 
@@ -151,10 +152,10 @@ for i = 1:30
     
     % compute the optimal solution:
     theta_hat_transpose = [ones(length(vertices(:,1)),1) vertices];
-    % [optimal_cost, optimal_control_input, alpha_k_current, alpha_k_1, predicted_v] = compute_optimal_solution(A0, A1, A2, A3, B0, B1, B2, B3, N, H_c, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x_t, current_point_estimate);
-    [optimal_cost, optimal_control_input, alpha_k_current, alpha_k_1, predicted_v] = compute_optimal_solution_V_form(A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x_t, current_point_estimate, length(V(:,1)), U_j, H_c, PI_theta, pi_t);
-    optimal_control_input
-    alpha_k_1
+    % [optimal_cost, optimal_control_input, alpha_k_current, alpha_k_1, predicted_v, sol] = compute_optimal_solution(A0, A1, A2, A3, B0, B1, B2, B3, N, H_c, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x_t, current_point_estimate);
+    [optimal_cost, optimal_control_input, alpha_k_current, alpha_k_1, predicted_v, sol] = compute_optimal_solution_V_form(A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, V, PI_w, pi_w, vertices, K, R, Q, x_t, length(V(:,1)), U_j, PI_theta, pi_t, current_point_estimate);
+    % optimal_control_input
+    % alpha_k_1
     
     
 %     [predicted_state, predicted_input] = compute_predicted_state_and_input(predicted_v, K, x_t, N, current_point_estimate, A0, A1, A2, A3, B0, B1, B2, B3);
@@ -183,14 +184,13 @@ for i = 1:30
     plot(x_t(1),x_t(2),'o','MarkerSize',5)
 
     
-    
 end
-% Title and labels for graph
+% % Title and labels for graph
 title('Model Predictive Controller')
 xlabel('x1') 
 ylabel('x2') 
-
-% Plot terminal parameter set
+% 
+% % Plot terminal parameter set
 theta = sdpvar(3,1);
 figure(parameter_set);
 subplot(2,1,1);
