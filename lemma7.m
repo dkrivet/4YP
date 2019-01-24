@@ -1,4 +1,4 @@
-function [H_c, K, lambda] = lemma7(A0, A1, A2, A3, B0, B1, B2, B3, PI_theta, pi_t, F, G, V)
+function H_c = lemma7(F, G, V, K)
 % Set initial values
 
 % F = [0 -3.33; 0 0];
@@ -23,7 +23,7 @@ function [H_c, K, lambda] = lemma7(A0, A1, A2, A3, B0, B1, B2, B3, PI_theta, pi_
 n_alpha = length(V(:,1));
 
 % calculate K
-[K, lambda] = calculate_K_from_V(A0, A1, A2, A3, B0, B1, B2, B3, PI_theta, pi_t, V);
+
 
 
 
