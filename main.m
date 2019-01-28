@@ -184,5 +184,3 @@ axis([-1 1 -1 1 -1 1])
 
 time_elapsed = toc
 end 
-
-
