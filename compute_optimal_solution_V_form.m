@@ -1,4 +1,4 @@
-function [optimal_cost, optimal_control_input, alpha_k_current, alpha_k_1, predicted_v, sol] = compute_optimal_solution_V_form(A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, V, PI_w, pi_w, vertices, K, R, Q, x_k, number_of_vertices, U_j, PI_theta, pi_theta, theta_hat)
+function [optimal_cost, optimal_control_input, alpha_k_current, alpha_k_1, predicted_v, sol] = compute_optimal_solution_V_form(A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, V, PI_w, pi_w, vertices, K, R, Q, x_k, number_of_vertices, U_j, PI_theta, pi_theta, theta_hat, M0, previous_control_input)
 
 m = length(vertices(:,1));
 % use compute_w_bar to get the value of w_bar for use later on:
@@ -10,6 +10,9 @@ v_k = sdpvar(N,1);
 % the way this is defined, the columns of alpha_k make up alpha(0|k),
 % alpha(1|k) , ... , alpha (N-1|k)
 alpha_k = sdpvar(length(V(:,1)),N+1); % dimensions of 9 x 11
+
+beta = sdpvar(1);
+du = sdpvar(1);
 
 for i = 1:N+1
     for j = 1:number_of_vertices
@@ -24,8 +27,9 @@ end
 % value
 [H, f_transpose] = construct_cost_matrices(A0, A1, A2, A3, B0, B1, B2, B3, K, N, R, Q, x_k, theta_hat);
 % define objective here ...
-Objective = v_k' * H * v_k + 2 * f_transpose * v_k;
-
+lambda = 10^4;
+Objective = v_k' * H * v_k + 2 * f_transpose * v_k - lambda * beta;
+% Objective = v_k' * H * v_k + 2 * f_transpose * v_k;
 
 
 % define constraints:
@@ -86,12 +90,18 @@ for j = 1:number_of_vertices
     Constraints = [Constraints, Lambda{N+1}{j} * pi_theta <= alpha_k(:,N+1) - V * compute_little_d_of_x_and_u(A0, B0, U_j{j} * alpha_k(:,N+1), K * U_j{j} * alpha_k(:,N+1)) - w_bar'];
     Constraints = [Constraints, Lambda{N+1}{j} >= 0];
 end
-    
+
+
+% Need to define M0
+D_x_u0 = compute_D_of_x_and_u(A1, A2, A3, B1, B2, B3, x_k, previous_control_input);
+L_du = compute_L_of_du(B1, B2, B3, du);
+Constraints = [Constraints, M0 + D_x_u0' * D_x_u0 + D_x_u0' * L_du + L_du' * D_x_u0 >= beta * eye(3)];
+Constraints = [Constraints, beta >= 0];
 
 
 
 % set solver options
-options = sdpsettings('solver','gurobi','verbose',0, 'cachesolvers', 1);
+options = sdpsettings('solver','mosek','verbose',0, 'cachesolvers', 1);
 % options = sdpsettings('solver','gurobi');
 
 % solve the optimization
