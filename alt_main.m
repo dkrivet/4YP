@@ -1,5 +1,5 @@
 function alt_main(H_form)
-tic % time the execution of the main function 
+ % time the execution of the main function 
 
 % Number of time steps to simulate:
 sim_time = 5000;
@@ -62,7 +62,7 @@ if ~H_form
 end
     
 % Calculate stabilising gain K from our V matrix
-[K, lambda] = calculate_K_from_V(A0, A1, A2, A3, B0, B1, B2, B3, PI_theta, pi_t, V);
+[K, ~] = calculate_K_from_V(A0, A1, A2, A3, B0, B1, B2, B3, PI_theta, pi_t, V);
 
 if H_form
     % Calculate H_c and K, and lambda using lemma7():
@@ -82,14 +82,14 @@ R = 1;
 % Offline section done! 
 
 %% Online Section of the Proposed Algorithm 
-state_evolution = figure;
-state_sum = figure;
-parameter_set = figure;
+% state_evolution = figure;
+% state_sum = figure;
+% parameter_set = figure;
 
 % Plot initial state
-figure(state_evolution);
-plot(x(1,1),x(2,1),'o','MarkerSize',5)
-hold on 
+% figure(state_evolution);
+% plot(x(1,1),x(2,1),'o','MarkerSize',5)
+% hold on 
 
 % Initialise theta_hat_0 inTHETA_0
 previous_point_estimate = [0 0 0]';
@@ -105,23 +105,24 @@ mu = 0.1;
 current_point_estimate = [0 0 0];
 
 % create sum for states
-sum_of_states = 0;
+% sum_of_states = 0;
 
 
-x_plot = sdpvar(2,1);
+% x_plot = sdpvar(2,1);
 for i = 1:sim_time
+    tic
     i
-    sum_of_states = sum_of_states + norm(x(:,i))^2;
-    figure(state_sum);
-    hold on
-    plot(i,sum_of_states,'x','MarkerSize',5)
+%     sum_of_states = sum_of_states + norm(x(:,i))^2;
+%     figure(state_sum);
+%     hold on
+%     plot(i,sum_of_states,'x','MarkerSize',5)
     
     % Do the parameter set update with this function to get pi_t_plus_one
     if i ~= 1
         pi_t_plus_one = parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x(:,i-1),u(i-1),x(:,i),PI_theta,PI_w,pi_t,pi_w);
         % calculate vertices of the newly updated parameter set:
         % remove semicolon at end of next line to output vertices 
-        vertices = compute_vertices(PI_theta,(pi_t_plus_one)')
+        vertices = compute_vertices(PI_theta,(pi_t_plus_one)');
         % update the value of pi_t
         pi_t = pi_t_plus_one';
     end
@@ -140,7 +141,7 @@ for i = 1:sim_time
     % Calculate point estimate
     if i ~= 1
         % remove semicolon at end of line to output current point estimate
-        current_point_estimate = point_estimate(A0, A1, A2, A3, B0, B1, B2, B3, x(:,i), x(:,i-1), u(i-1), previous_point_estimate, PI_theta, pi_t, mu)
+        current_point_estimate = point_estimate(A0, A1, A2, A3, B0, B1, B2, B3, x(:,i), x(:,i-1), u(i-1), previous_point_estimate, PI_theta, pi_t, mu);
         previous_point_estimate = current_point_estimate;
     end
     
@@ -154,9 +155,9 @@ for i = 1:sim_time
         previous_control_input = u(i-1);
     end
     if H_form
-        [optimal_cost, u(i), alpha_k_current, alpha_k_1, predicted_v, sol] = compute_optimal_solution(A0, A1, A2, A3, B0, B1, B2, B3, N, H_c, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x(:,i), current_point_estimate);
+        [~, u(i), ~, ~, ~, ~] = compute_optimal_solution(A0, A1, A2, A3, B0, B1, B2, B3, N, H_c, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x(:,i), current_point_estimate);
     else
-        [optimal_cost, u(i), alpha_k_current, alpha_k_1, predicted_v, sol] = compute_optimal_solution_V_form(A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, V, PI_w, pi_w, vertices, K, R, Q, x(:,i), length(V(:,1)), U_j, PI_theta, pi_t, current_point_estimate, M0, previous_control_input);
+        [~, u(i), ~, ~, ~, ~] = compute_optimal_solution_V_form(A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, V, PI_w, pi_w, vertices, K, R, Q, x(:,i), length(V(:,1)), U_j, PI_theta, pi_t, current_point_estimate, M0, previous_control_input);
     end
     
        
@@ -170,27 +171,27 @@ for i = 1:sim_time
     
     % Plot the newly computed state
     % plot for all i|0 at initial time step 
-    figure(state_evolution);
-    plot(V*x_plot<= alpha_k_1)
-    plot(x(1,i+1),x(2,i+1),'o','MarkerSize',5)
-
+%     figure(state_evolution);
+%     plot(V*x_plot<= alpha_k_1)
+%     plot(x(1,i+1),x(2,i+1),'o','MarkerSize',5)
+time_elapsed = toc
     
 end
 % Title and labels for graph
-title('Model Predictive Controller')
-xlabel('x1') 
-ylabel('x2') 
+% title('Model Predictive Controller')
+% xlabel('x1') 
+% ylabel('x2') 
 
 % Plot terminal parameter set
-theta = sdpvar(3,1);
-figure(parameter_set);
-subplot(2,1,1);
-plot(PI_theta * theta <= ones(6,1))
-axis([-1 1 -1 1 -1 1])
-subplot(2,1,2);
-plot(PI_theta * theta <= pi_t)
-axis([-1 1 -1 1 -1 1])
+% theta = sdpvar(3,1);
+% figure(parameter_set);
+% subplot(2,1,1);
+% plot(PI_theta * theta <= ones(6,1))
+% axis([-1 1 -1 1 -1 1])
+% subplot(2,1,2);
+% plot(PI_theta * theta <= pi_t)
+% axis([-1 1 -1 1 -1 1])
 
 
-time_elapsed = toc
+
 end 
