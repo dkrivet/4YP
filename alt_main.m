@@ -2,7 +2,7 @@ function alt_main(H_form)
  % time the execution of the main function 
 
 % Number of time steps to simulate:
-sim_time = 5000;
+sim_time = 30;
 x = zeros(2,sim_time+1);
 u = zeros(1, sim_time);
 
@@ -168,13 +168,15 @@ for i = 1:sim_time
     [A_theta, B_theta] = calculate_AandB_theta_j(B0,B1,B2,B3,A0,A1,A2,A3,true_theta);
     w_t = [(randi([0 2000])-1000)/10000;(randi([0 2000])-1000)/10000];
     x(:,i+1) = A_theta * x(:,i) + B_theta * u(i) + w_t;
+
     
     % Plot the newly computed state
     % plot for all i|0 at initial time step 
 %     figure(state_evolution);
 %     plot(V*x_plot<= alpha_k_1)
 %     plot(x(1,i+1),x(2,i+1),'o','MarkerSize',5)
-time_elapsed = toc
+
+    time_elapsed = toc
     
 end
 % Title and labels for graph
