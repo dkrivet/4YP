@@ -14,11 +14,13 @@ alpha_k = sdpvar(length(V(:,1)),N+1); % dimensions of 9 x 11
 beta = sdpvar(1);
 du = sdpvar(1);
 
-for i = 1:N+1
-    for j = 1:number_of_vertices
-        Lambda{i}{j} = sdpvar(length(V(:,1)),6,'full');
-    end
-end
+% for i = 1:N+1
+%     for j = 1:number_of_vertices
+%         Lambda{i}{j} = sdpvar(length(V(:,1)),6,'full');
+%     end
+% end
+
+Lambda = sdpvar(length(V(:,1)),6,N+1,number_of_vertices,'full');
 
 
 
@@ -39,7 +41,7 @@ Constraints = [];
 % end
 for j = 1:number_of_vertices
     for i = 1:N
-        Constraints = [Constraints, (F + G * K) * U_j{j} * alpha_k(:,i) + G * v_k(i) <= ones(size(G))];
+        Constraints = [Constraints, (F + G * K) * U_j(:,:,j) * alpha_k(:,i) + G * v_k(i) <= ones(size(G))];
     end
 end
 
@@ -59,9 +61,9 @@ end
 
 for i = 1:N
     for j = 1:number_of_vertices
-        Constraints = [Constraints, Lambda{i}{j} * PI_theta == V * compute_D_of_x_and_u(A1, A2, A3, B1, B2, B3, U_j{j} * alpha_k(:,i), K * U_j{j} * alpha_k(:,i) + v_k(i))];
-        Constraints = [Constraints, Lambda{i}{j} >= 0];
-        Constraints = [Constraints, Lambda{i}{j} * pi_theta <= alpha_k(:,i+1) - V * compute_little_d_of_x_and_u(A0, B0, U_j{j} * alpha_k(:,i), K * U_j{j} * alpha_k(:,i) + v_k(i)) - w_bar'];
+        Constraints = [Constraints, Lambda(:,:,i,j) * PI_theta == V * compute_D_of_x_and_u(A1, A2, A3, B1, B2, B3, U_j(:,:,j) * alpha_k(:,i), K * U_j(:,:,j) * alpha_k(:,i) + v_k(i))];
+        Constraints = [Constraints, Lambda(:,:,i,j) >= 0];
+        Constraints = [Constraints, Lambda(:,:,i,j) * pi_theta <= alpha_k(:,i+1) - V * compute_little_d_of_x_and_u(A0, B0, U_j(:,:,j) * alpha_k(:,i), K * U_j(:,:,j) * alpha_k(:,i) + v_k(i)) - w_bar'];
     end
 end
 
@@ -76,7 +78,7 @@ end
 Constraints = [Constraints, alpha_k(:,1) >= V * x_k];
 % Constraints = [Constraints, H_c * alpha_k(:,N+1) <= ones(size(H_c * alpha_k(:,N+1)))];
 for j = 1:number_of_vertices
-    Constraints = [Constraints, (F + G * K) * U_j{j} * alpha_k(:,N+1) <= 1];
+    Constraints = [Constraints, (F + G * K) * U_j(:,:,j) * alpha_k(:,N+1) <= 1];
 end
 
 
@@ -86,9 +88,9 @@ end
 %     end
 % end
 for j = 1:number_of_vertices
-    Constraints = [Constraints, Lambda{N+1}{j} * PI_theta == V * compute_D_of_x_and_u(A1, A2, A3, B1, B2, B3, U_j{j} * alpha_k(:,N+1), K * U_j{j} * alpha_k(:,N+1))];
-    Constraints = [Constraints, Lambda{N+1}{j} * pi_theta <= alpha_k(:,N+1) - V * compute_little_d_of_x_and_u(A0, B0, U_j{j} * alpha_k(:,N+1), K * U_j{j} * alpha_k(:,N+1)) - w_bar'];
-    Constraints = [Constraints, Lambda{N+1}{j} >= 0];
+    Constraints = [Constraints, Lambda(:,:,N+1,j) * PI_theta == V * compute_D_of_x_and_u(A1, A2, A3, B1, B2, B3, U_j(:,:,j) * alpha_k(:,N+1), K * U_j(:,:,j) * alpha_k(:,N+1))];
+    Constraints = [Constraints, Lambda(:,:,N+1,j) * pi_theta <= alpha_k(:,N+1) - V * compute_little_d_of_x_and_u(A0, B0, U_j(:,:,j) * alpha_k(:,N+1), K * U_j(:,:,j) * alpha_k(:,N+1)) - w_bar'];
+    Constraints = [Constraints, Lambda(:,:,N+1,j) >= 0];
 end
 
 
