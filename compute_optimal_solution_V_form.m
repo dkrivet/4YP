@@ -27,7 +27,7 @@ end
 % value
 [H, f_transpose] = construct_cost_matrices(A0, A1, A2, A3, B0, B1, B2, B3, K, N, R, Q, x_k, theta_hat);
 % define objective here ...
-lambda = 10^4;
+lambda = 10^6;
 Objective = v_k' * H * v_k + 2 * f_transpose * v_k - lambda * beta;
 % Objective = v_k' * H * v_k + 2 * f_transpose * v_k;
 
@@ -95,7 +95,8 @@ end
 % Need to define M0
 D_x_u0 = compute_D_of_x_and_u(A1, A2, A3, B1, B2, B3, x_k, previous_control_input);
 L_du = compute_L_of_du(B1, B2, B3, du);
-Constraints = [Constraints, M0 + D_x_u0' * D_x_u0 + D_x_u0' * L_du + L_du' * D_x_u0 >= beta * eye(3)];
+% check this constraint is satisfied 
+Constraints = [Constraints, M0 + D_x_u0' * D_x_u0 + D_x_u0' * L_du + L_du' * D_x_u0 >= beta];
 Constraints = [Constraints, beta >= 0];
 
 
@@ -119,6 +120,10 @@ alpha_k_current = value(alpha_k(:,1));
 alpha_k_1 = value(alpha_k(:,2));
 
 predicted_v = value(v_k);
+
+M0
+value(beta)
+value(M0 + D_x_u0' * D_x_u0 + D_x_u0' * L_du + L_du' * D_x_u0)
 
 % value(H_c * alpha_k(:,10) + G * value(v_k(10,1)))
 
