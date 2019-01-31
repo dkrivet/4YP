@@ -126,7 +126,9 @@ for i = 1:sim_time
         % update the value of pi_t
         pi_t = pi_t_plus_one';
     end
-    
+
+    % compute size of parameter set    
+    radial_size = compute_parameter_set_size(pi_t)
     
     % update lambda_t:
     % lambda_t = update_lambda_t(vertices, H_hat);
@@ -157,7 +159,7 @@ for i = 1:sim_time
     if H_form
         [~, u(i), ~, ~, ~, ~] = compute_optimal_solution(A0, A1, A2, A3, B0, B1, B2, B3, N, H_c, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x(:,i), current_point_estimate);
     else
-        [~, u(i), ~, ~, ~, ~] = compute_optimal_solution_V_form(A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, V, PI_w, pi_w, vertices, K, R, Q, x(:,i), length(V(:,1)), U_j, PI_theta, pi_t, current_point_estimate, M0, previous_control_input);
+        [~, u(i), ~, alpha_k_1, ~, ~] = compute_optimal_solution_V_form(A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, V, PI_w, pi_w, vertices, K, R, Q, x(:,i), length(V(:,1)), U_j, PI_theta, pi_t, current_point_estimate, M0, previous_control_input);
     end
     
        
