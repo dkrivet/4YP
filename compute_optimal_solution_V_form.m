@@ -39,6 +39,8 @@ Constraints = [];
 % for i = 1:N
 %     Constraints = [Constraints, H_c * alpha_k(:,i) + G * v_k(i) <= ones(size(G))];
 % end
+
+% Constraint type: Element-wise inequality
 for j = 1:number_of_vertices
     for i = 1:N
         Constraints = [Constraints, (F + G * K) * U_j(:,:,j) * alpha_k(:,i) + G * v_k(i) <= ones(size(G))];
@@ -61,8 +63,11 @@ end
 
 for i = 1:N
     for j = 1:number_of_vertices
+        % Constraint type: Equality constraint
         Constraints = [Constraints, Lambda(:,:,i,j) * PI_theta == V * compute_D_of_x_and_u(A1, A2, A3, B1, B2, B3, U_j(:,:,j) * alpha_k(:,i), K * U_j(:,:,j) * alpha_k(:,i) + v_k(i))];
+        % Constraint type: Element-wise inequality
         Constraints = [Constraints, Lambda(:,:,i,j) >= 0];
+        % Constraint type: Element-wise inequality
         Constraints = [Constraints, Lambda(:,:,i,j) * pi_theta <= alpha_k(:,i+1) - V * compute_little_d_of_x_and_u(A0, B0, U_j(:,:,j) * alpha_k(:,i), K * U_j(:,:,j) * alpha_k(:,i) + v_k(i)) - w_bar'];
     end
 end
@@ -74,10 +79,11 @@ end
 
 
 
-
+% Constraint type: Element-wise inequality
 Constraints = [Constraints, alpha_k(:,1) >= V * x_k];
 % Constraints = [Constraints, H_c * alpha_k(:,N+1) <= ones(size(H_c * alpha_k(:,N+1)))];
 for j = 1:number_of_vertices
+    % Constraint type: Element-wise inequality
     Constraints = [Constraints, (F + G * K) * U_j(:,:,j) * alpha_k(:,N+1) <= 1];
 end
 
@@ -88,19 +94,26 @@ end
 %     end
 % end
 for j = 1:number_of_vertices
+    % Constraint type: Equality constraint
     Constraints = [Constraints, Lambda(:,:,N+1,j) * PI_theta == V * compute_D_of_x_and_u(A1, A2, A3, B1, B2, B3, U_j(:,:,j) * alpha_k(:,N+1), K * U_j(:,:,j) * alpha_k(:,N+1))];
+    % Constraint type: Element-wise inequality
     Constraints = [Constraints, Lambda(:,:,N+1,j) * pi_theta <= alpha_k(:,N+1) - V * compute_little_d_of_x_and_u(A0, B0, U_j(:,:,j) * alpha_k(:,N+1), K * U_j(:,:,j) * alpha_k(:,N+1)) - w_bar'];
+    % Constraint type: Element-wise inequality
     Constraints = [Constraints, Lambda(:,:,N+1,j) >= 0];
 end
 
 
-% Need to define M0
+
 D_x_u0 = compute_D_of_x_and_u(A1, A2, A3, B1, B2, B3, x_k, previous_control_input);
 L_du = compute_L_of_du(B1, B2, B3, du);
+
 % check this constraint is satisfied 
+% Constraint type: Matrix inequality
 Constraints = [Constraints, M0 + D_x_u0' * D_x_u0 + D_x_u0' * L_du + L_du' * D_x_u0 >= beta];
+% Constraint type: Element-wise inequality
 Constraints = [Constraints, beta >= 0];
 
+Constraints
 
 
 % set solver options
@@ -112,22 +125,11 @@ sol = optimize(Constraints, Objective, options);
 
 optimal_cost = value(v_k' * H * v_k + 2 * f_transpose * v_k);
 optimal_control_input = value(K * x_k + v_k(1));
-% v_k(1)
-
-    
-% x = value(alpha_k(:,1));
-% x(isnan(x)) = 0;
-% alpha_k_0 = x;
 alpha_k_current = value(alpha_k(:,1));
 alpha_k_1 = value(alpha_k(:,2));
-
 predicted_v = value(v_k);
 
-M0
-value(beta)
-value(M0 + D_x_u0' * D_x_u0 + D_x_u0' * L_du + L_du' * D_x_u0)
 
-% value(H_c * alpha_k(:,10) + G * value(v_k(10,1)))
 
 end 
 
