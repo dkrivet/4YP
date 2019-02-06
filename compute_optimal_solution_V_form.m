@@ -14,12 +14,6 @@ alpha_k = sdpvar(length(V(:,1)),N+1); % dimensions of 9 x 11
 beta = sdpvar(1);
 du = sdpvar(1);
 
-% for i = 1:N+1
-%     for j = 1:number_of_vertices
-%         Lambda{i}{j} = sdpvar(length(V(:,1)),6,'full');
-%     end
-% end
-
 Lambda = sdpvar(length(V(:,1)),6,N+1,number_of_vertices,'full');
 
 
@@ -36,9 +30,6 @@ Objective = v_k' * H * v_k + 2 * f_transpose * v_k - lambda * beta;
 
 % define constraints:
 Constraints = [];
-% for i = 1:N
-%     Constraints = [Constraints, H_c * alpha_k(:,i) + G * v_k(i) <= ones(size(G))];
-% end
 
 % Constraint type: Element-wise inequality
 for j = 1:number_of_vertices
@@ -47,18 +38,6 @@ for j = 1:number_of_vertices
     end
 end
 
-
-% ask about this line. Probably not right to just say alpha_k_plus_one is a
-% vector of ones
-% alpha_k_plus_one = ones(1,length(V(:,1)));
-% for i = 1:length(V(:,1))
-%     for j = 1:length(vertices(:,1))
-%         [A_theta_j, B_theta_j] = calculate_AandB_theta_j(B0,B1,B2,B3,A0,A1,A2,A3,vertices(j,:));
-%         for k = 1:N
-%             Constraints = [Constraints, theta_hat_transpose(j,:) * H_hat{i} * alpha_k(:,k) + V(i,:) * B_theta_j * v_k(k) + w_bar(i) <= alpha_k(i,k+1)];
-%         end 
-%     end
-% end
 
 
 for i = 1:N
@@ -74,11 +53,6 @@ end
 
 
 
-
-
-
-
-
 % Constraint type: Element-wise inequality
 Constraints = [Constraints, alpha_k(:,1) >= V * x_k];
 % Constraints = [Constraints, H_c * alpha_k(:,N+1) <= ones(size(H_c * alpha_k(:,N+1)))];
@@ -88,11 +62,6 @@ for j = 1:number_of_vertices
 end
 
 
-% for i = 1:length(V(:,1))
-%     for j = 1:m
-%         Constraints = [Constraints, alpha_k(i,N+1) >= theta_hat_transpose(j,:) * H_hat{i} * alpha_k(:,N+1) + w_bar(i)];
-%     end
-% end
 for j = 1:number_of_vertices
     % Constraint type: Equality constraint
     Constraints = [Constraints, Lambda(:,:,N+1,j) * PI_theta == V * compute_D_of_x_and_u(A1, A2, A3, B1, B2, B3, U_j(:,:,j) * alpha_k(:,N+1), K * U_j(:,:,j) * alpha_k(:,N+1))];
@@ -112,8 +81,6 @@ L_du = compute_L_of_du(B1, B2, B3, du);
 Constraints = [Constraints, M0 + D_x_u0' * D_x_u0 + D_x_u0' * L_du + L_du' * D_x_u0 >= beta];
 % Constraint type: Element-wise inequality
 Constraints = [Constraints, beta >= 0];
-
-Constraints
 
 
 % set solver options
