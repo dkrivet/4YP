@@ -1,8 +1,8 @@
-function alt_main(H_form)
+function alt_main(H_form, to_plot)
  % time the execution of the main function 
 
 % Number of time steps to simulate:
-sim_time = 30;
+sim_time = 1000;
 x = zeros(2,sim_time+1);
 u = zeros(1, sim_time);
 
@@ -82,14 +82,16 @@ R = 1;
 % Offline section done! 
 
 %% Online Section of the Proposed Algorithm 
-% state_evolution = figure;
-% state_sum = figure;
-% parameter_set = figure;
+if to_plot
+    state_evolution = figure;
+    state_sum = figure;
+    parameter_set = figure;
 
-% Plot initial state
-% figure(state_evolution);
-% plot(x(1,1),x(2,1),'o','MarkerSize',5)
-% hold on 
+    % Plot initial state
+    figure(state_evolution);
+    plot(x(1,1),x(2,1),'o','MarkerSize',5)
+    hold on 
+end
 
 % Initialise theta_hat_0 inTHETA_0
 previous_point_estimate = [0 0 0]';
@@ -105,24 +107,26 @@ mu = 0.1;
 current_point_estimate = [0 0 0];
 
 % create sum for states
-% sum_of_states = 0;
-
-
-% x_plot = sdpvar(2,1);
+if to_plot
+    sum_of_states = 0;
+    x_plot = sdpvar(2,1);
+end
 for i = 1:sim_time
     tic
     i
-%     sum_of_states = sum_of_states + norm(x(:,i))^2;
-%     figure(state_sum);
-%     hold on
-%     plot(i,sum_of_states,'x','MarkerSize',5)
+    if to_plot
+        sum_of_states = sum_of_states + norm(x(:,i))^2;
+        figure(state_sum);
+        hold on
+        plot(i,sum_of_states,'x','MarkerSize',5)
+    end
     
     % Do the parameter set update with this function to get pi_t_plus_one
     if i ~= 1
         pi_t_plus_one = parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x(:,i-1),u(i-1),x(:,i),PI_theta,PI_w,pi_t,pi_w);
         % calculate vertices of the newly updated parameter set:
         % remove semicolon at end of next line to output vertices 
-        vertices = compute_vertices(PI_theta,(pi_t_plus_one)');
+        vertices = compute_vertices(PI_theta,(pi_t_plus_one)')
         % update the value of pi_t
         pi_t = pi_t_plus_one';
     end
@@ -134,10 +138,6 @@ for i = 1:sim_time
     % lambda_t = update_lambda_t(vertices, H_hat);
     % disp(lambda_t)
 
-    % store previous value for optimal_control_input
-%     if i ~= 1
-%         u_k_1 = optimal_control_input;
-%     end
 
     
     % Calculate point estimate
@@ -168,33 +168,42 @@ for i = 1:sim_time
     
     % Update the state using the computed optimal control input and true parameter value
     [A_theta, B_theta] = calculate_AandB_theta_j(B0,B1,B2,B3,A0,A1,A2,A3,true_theta);
+    % w_t = [(round(rand) - 0.5)/5;(round(rand) - 0.5)/5];
     w_t = [(randi([0 2000])-1000)/10000;(randi([0 2000])-1000)/10000];
+    [~, idx] = max(w_t);
+    w_t(idx) = (round(rand) - 0.5)/5;
     x(:,i+1) = A_theta * x(:,i) + B_theta * u(i) + w_t;
 
     
     % Plot the newly computed state
     % plot for all i|0 at initial time step 
-%     figure(state_evolution);
-%     plot(V*x_plot<= alpha_k_1)
-%     plot(x(1,i+1),x(2,i+1),'o','MarkerSize',5)
-
+    if to_plot
+        figure(state_evolution);
+        plot(V*x_plot<= alpha_k_1)
+        plot(x(1,i+1),x(2,i+1),'o','MarkerSize',5)
+    end
+    
     time_elapsed = toc
     
 end
-% Title and labels for graph
-% title('Model Predictive Controller')
-% xlabel('x1') 
-% ylabel('x2') 
 
-% Plot terminal parameter set
-% theta = sdpvar(3,1);
-% figure(parameter_set);
-% subplot(2,1,1);
-% plot(PI_theta * theta <= ones(6,1))
-% axis([-1 1 -1 1 -1 1])
-% subplot(2,1,2);
-% plot(PI_theta * theta <= pi_t)
-% axis([-1 1 -1 1 -1 1])
+
+if to_plot
+    % Title and labels for graph
+    title('Model Predictive Controller')
+    xlabel('x1') 
+    ylabel('x2') 
+
+    % Plot terminal parameter set
+    theta = sdpvar(3,1);
+    figure(parameter_set);
+    subplot(2,1,1);
+    plot(PI_theta * theta <= ones(6,1))
+    axis([-1 1 -1 1 -1 1])
+    subplot(2,1,2);
+    plot(PI_theta * theta <= pi_t)
+    axis([-1 1 -1 1 -1 1])
+end
 
 
 
