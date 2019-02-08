@@ -2,7 +2,7 @@ function alt_main(H_form, to_plot)
  % time the execution of the main function 
 
 % Number of time steps to simulate:
-sim_time = 1000;
+sim_time = 30;
 x = zeros(2,sim_time+1);
 u = zeros(1, sim_time);
 
@@ -111,6 +111,8 @@ if to_plot
     sum_of_states = 0;
     x_plot = sdpvar(2,1);
 end
+
+previous_v = 0;
 for i = 1:sim_time
     tic
     i
@@ -159,7 +161,8 @@ for i = 1:sim_time
     if H_form
         [~, u(i), ~, ~, ~, ~] = compute_optimal_solution(A0, A1, A2, A3, B0, B1, B2, B3, N, H_c, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x(:,i), current_point_estimate);
     else
-        [~, u(i), ~, alpha_k_1, ~, ~] = compute_optimal_solution_V_form(A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, V, PI_w, pi_w, vertices, K, R, Q, x(:,i), length(V(:,1)), U_j, PI_theta, pi_t, current_point_estimate, M0, previous_control_input);
+        [~, u(i), ~, alpha_k_1, predicted_v, ~] = compute_optimal_solution_V_form(i, A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, V, PI_w, pi_w, vertices, K, R, Q, x(:,i), length(V(:,1)), U_j, PI_theta, pi_t, current_point_estimate, M0, previous_control_input,previous_v);
+        previous_v = predicted_v;
     end
     
        
