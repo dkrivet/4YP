@@ -2,7 +2,7 @@ function alt_main(H_form, to_plot)
  % time the execution of the main function 
 
 % Number of time steps to simulate:
-sim_time = 30;
+sim_time = 60;
 x = zeros(2,sim_time+1);
 u = zeros(1, sim_time);
 
@@ -21,7 +21,7 @@ B2 = [0;0];
 B3 = [0.0397;0.059];
 
 % initial condition:
-x(:,1) = [3; 6];
+x(:,1) = [2; -0.3];
 
 % define sets for system parameters and disturbance
 PI_theta = [1 0 0;0 1 0;0 0 1;-1 0 0;0 -1 0;0 0 -1];
@@ -89,7 +89,12 @@ if to_plot
 
     % Plot initial state
     figure(state_evolution);
-    plot(x(1,1),x(2,1),'o','MarkerSize',5)
+    plot(x(1,1),x(2,1),'xg','MarkerSize',10)
+%     bla_x = linspace(-1,6,200);
+%     bla_y = -0.3 * ones(length(bla_x));
+%     plot(bla_x,bla_y)
+%     xlim([-inf inf])
+%     ylim([-0.5 inf])
     hold on 
 end
 
@@ -161,7 +166,7 @@ for i = 1:sim_time
     if H_form
         [~, u(i), ~, ~, ~, ~] = compute_optimal_solution(A0, A1, A2, A3, B0, B1, B2, B3, N, H_c, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x(:,i), current_point_estimate);
     else
-        [~, u(i), ~, alpha_k_1, predicted_v, ~] = compute_optimal_solution_V_form(i, A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, V, PI_w, pi_w, vertices, K, R, Q, x(:,i), length(V(:,1)), U_j, PI_theta, pi_t, current_point_estimate, M0, previous_control_input,previous_v);
+        [~, u(i), ~, alpha_k, predicted_v, ~] = compute_optimal_solution_V_form(i, A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, V, PI_w, pi_w, vertices, K, R, Q, x(:,i), length(V(:,1)), U_j, PI_theta, pi_t, current_point_estimate, M0, previous_control_input,previous_v);
         previous_v = predicted_v;
     end
     
@@ -180,10 +185,26 @@ for i = 1:sim_time
     
     % Plot the newly computed state
     % plot for all i|0 at initial time step 
+    
     if to_plot
         figure(state_evolution);
-        plot(V*x_plot<= alpha_k_1)
-        plot(x(1,i+1),x(2,i+1),'o','MarkerSize',5)
+        % plot(V*x_plot<= alpha_k_1)
+        if i <= 30
+            plot(x(1,i+1),x(2,i+1),'or','MarkerSize',5)
+        else
+            plot(x(1,i+1),x(2,i+1),'ob','MarkerSize',5)
+        end
+    end
+    
+    %------------DO PE Check----------------%
+    if i>10
+        PE_sum = calculate_M0(x, u, i, A1, A2, A3, B1, B2, B3);
+        eigs = eig(PE_sum);
+        if all(eigs>10^(-6))
+            fprintf('PE CONDITION SATISFIED')
+        else
+            fprintf('UH OH, NO PE')
+        end
     end
     
     time_elapsed = toc
