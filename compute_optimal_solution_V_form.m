@@ -13,6 +13,7 @@ alpha_k = sdpvar(length(V(:,1)),N+1); % dimensions of 9 x 11
 
 beta = sdpvar(1);
 du = sdpvar(1);
+M = sdpvar(3,3,N-1);
 
 Lambda = sdpvar(length(V(:,1)),6,N+1,number_of_vertices,'full');
 
@@ -34,6 +35,7 @@ if mod(current_time_step,2) == 0
 else
     lambda = 0;
 end
+% lambda=10^6;
 
 if current_time_step > 1
     Objective = v_k' * H * v_k + 2 * f_transpose * v_k - lambda * beta;
@@ -101,6 +103,7 @@ end
 
 % if current_time_step > 1 && current_time_step <=30
 if current_time_step > 1 && mod(current_time_step,2) == 0
+% if current_time_step > 1  
     % New constraints PE into future:
     [A_theta_hat, B_theta_hat] = calculate_AandB_theta_j(B0,B1,B2,B3,A0,A1,A2,A3,theta_hat);
     for i = 1:(N-1)
@@ -117,17 +120,28 @@ if current_time_step > 1 && mod(current_time_step,2) == 0
     end
     % v_hat, x_hat, and u_hat are now fully defined
 
-    for j = 1:length(U_j(:,:,1))    
+%     for j = 1:length(U_j(:,:,1))    
+%         sum = 0;
+%         for i = 1:N-1
+%             D_hat = compute_D_of_x_and_u(A1, A2, A3, B1, B2, B3, x_hat(:,i), u_hat(i));
+%             D_tilda = compute_D_of_x_and_u(A1, A2, A3, B1, B2, B3, U_j(:,:,j)*alpha_k(:,i)-x_hat(i), u_hat(i));
+%             sum = sum + D_hat'*D_hat + D_hat'*D_tilda + D_tilda'*D_hat;
+%         end
+%         Constraints = [Constraints, M0 + sum >= beta];
+%     end
+    for i =1:N-1
         sum = 0;
-        for i = 1:N-1
+        for j = 1:length(U_j(:,:,1))
             D_hat = compute_D_of_x_and_u(A1, A2, A3, B1, B2, B3, x_hat(:,i), u_hat(i));
             D_tilda = compute_D_of_x_and_u(A1, A2, A3, B1, B2, B3, U_j(:,:,j)*alpha_k(:,i)-x_hat(i), u_hat(i));
-            sum = sum + D_hat'*D_hat + D_hat'*D_tilda + D_tilda'*D_hat;
+            Constraints = [Constraints, D_hat'*D_hat + D_hat'*D_tilda + D_tilda'*D_hat >= M(:,:,i)];
         end
-        Constraints = [Constraints, M0 + sum >= beta];
+        sum = sum + M(:,:,i);
+        Constraints = [Constraints, M(:,:,i) >= 0];
     end
-    Constraints = [Constraints, beta>=0];
-    Constraints = [Constraints, beta<=100];
+    Constraints = [Constraints, sum >= beta];
+    Constraints = [Constraints, beta>=0, beta<=100];
+    %Constraints = [Constraints, beta<=100];
 end
 
 
@@ -137,6 +151,7 @@ options = sdpsettings('solver','mosek','verbose',0, 'cachesolvers', 1);
 
 % solve the optimization
 sol = optimize(Constraints, Objective, options);
+
 
 optimal_cost = value(v_k' * H * v_k + 2 * f_transpose * v_k);
 optimal_control_input = value(K * x_k + v_k(1));
