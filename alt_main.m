@@ -21,7 +21,7 @@ B2 = [0;0];
 B3 = [0.0397;0.059];
 
 % initial condition:
-x(:,1) = [2; -0.3];
+x(:,1) = [3; 6];
 
 % define sets for system parameters and disturbance
 PI_theta = [1 0 0;0 1 0;0 0 1;-1 0 0;0 -1 0;0 0 -1];
@@ -29,8 +29,14 @@ PI_w = [1 0;0 1;-1 0;0 -1];
 pi_t = [1; 1; 1; 1; 1; 1];
 pi_w = [0.1; 0.1; 0.1; 0.1];
 
+% Define set for Theta_tilda
+U = PI_theta;
+h = [0.05;0.05;0.05;0.05;0.05;0.05];
+
 % True theta value that we will try to converge to
 true_theta = [0.8 0.2 -0.5];
+% true_theta_star = [0.8 0.2 -0.5];
+
 
 % define F and G matrices to satisfy constraints on state and input
 F = [1/10 0; -1/10 0; 0 -10/3; 0 1/10; 0 0; 0 0];
@@ -121,6 +127,20 @@ previous_v = 0;
 for i = 1:sim_time
     tic
     i
+    
+    %------ Generate theta = theta_star + theta_tilda -----%
+%     theta_tilda = rand(1,3);
+%     theta_tilda = (theta_tilda - 0.5)/10;
+%     [mx, idx] = max(theta_tilda);
+%     if mx >= 0
+%         theta_tilda(idx) = 0.1;
+%     else
+%         theta_tilda(idx) = -0.1;
+%     end
+%     true_theta = true_theta_star + theta_tilda;
+    
+    
+    
     if to_plot
         sum_of_states = sum_of_states + norm(x(:,i))^2;
         figure(state_sum);
@@ -128,9 +148,10 @@ for i = 1:sim_time
         plot(i,sum_of_states,'x','MarkerSize',5)
     end
     
-    % Do the parameter set update with this function to get pi_t_plus_one
+    %--------------- Parameter Set Update ----------------%
     if i ~= 1
         pi_t_plus_one = parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x(:,i-1),u(i-1),x(:,i),PI_theta,PI_w,pi_t,pi_w);
+        % pi_t_plus_one = varying_parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x(:,i-1),u(i-1),x(:,i),PI_theta,PI_w,pi_t,pi_w,U,h);
         % calculate vertices of the newly updated parameter set:
         % remove semicolon at end of next line to output vertices 
         vertices = compute_vertices(PI_theta,(pi_t_plus_one)')
@@ -138,7 +159,7 @@ for i = 1:sim_time
         pi_t = pi_t_plus_one';
     end
 
-    % compute size of parameter set    
+    %---------- Compute Paremeter Set Radial Size -----------%    
     radial_size = compute_parameter_set_size(pi_t)
     
     % update lambda_t:
