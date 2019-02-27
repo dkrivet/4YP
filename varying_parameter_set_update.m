@@ -13,12 +13,16 @@ Constraints = [Constraints, -d - D * theta_star == D * theta_tilda + w];
 Constraints = [Constraints, U * theta_tilda <= h];
 Constraints = [Constraints, PI_w * w <= pi_w];
 
-options = sdpsettings('solver','gurobi','verbose',0);
+options = sdpsettings('solver','gurobi','verbose',1);
 
 for i = 1:length(PI_theta(:,1))
     Objective = -PI_theta(i,:) * theta_star;
     
     sol = optimize(Constraints, Objective, options);
+    
+    if sol.problem ~= 0
+        fprintf('ATTENTION!! \n Varying Parameter Set Update Optimization had a problem \n')
+    end
     
     pi_t_plus_one(i) = value(PI_theta(i,:) * theta_star);
 
