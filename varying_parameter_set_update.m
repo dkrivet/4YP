@@ -1,4 +1,4 @@
-function pi_t_plus_one = varying_parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x_t_1,u_t_1,x_t,PI_theta,PI_w,pi_t,pi_w,U,h)
+  function pi_t_plus_one = varying_parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x_t_1,u_t_1,x_t,PI_theta,PI_w,pi_t,pi_w,U,h)
 
 D = compute_D_of_x_and_u(A1, A2, A3, B1, B2, B3, x_t_1, u_t_1);
 d = A0 * x_t_1 + B0 * u_t_1 - x_t;
@@ -13,7 +13,7 @@ Constraints = [Constraints, -d - D * theta_star == D * theta_tilda + w];
 Constraints = [Constraints, U * theta_tilda <= h];
 Constraints = [Constraints, PI_w * w <= pi_w];
 
-options = sdpsettings('solver','gurobi','verbose',1);
+options = sdpsettings('solver','gurobi','verbose',0);
 
 for i = 1:length(PI_theta(:,1))
     Objective = -PI_theta(i,:) * theta_star;
