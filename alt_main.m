@@ -2,7 +2,7 @@ function alt_main(H_form, to_plot)
  % time the execution of the main function 
 
 % Number of time steps to simulate:
-sim_time = 60;
+sim_time = 100;
 x = zeros(2,sim_time+1);
 u = zeros(1, sim_time);
 
@@ -31,11 +31,11 @@ pi_w = [0.1; 0.1; 0.1; 0.1];
 
 % Define set for Theta_tilda
 U = PI_theta;
-h = [0.05;0.05;0.05;0.05;0.05;0.05];
+h = [0.1;0.1;0.1;0.1;0.1;0.1];
 
 % True theta value that we will try to converge to
-true_theta = [0.8 0.2 -0.5];
-% true_theta_star = [0.8 0.2 -0.5];
+% true_theta = [0.8 0.2 -0.5];
+true_theta_star = [0.8 0.2 -0.5];
 
 
 % define F and G matrices to satisfy constraints on state and input
@@ -92,6 +92,7 @@ if to_plot
     state_evolution = figure;
     state_sum = figure;
     parameter_set = figure;
+    parameter_set_size = figure;
 
     % Plot initial state
     figure(state_evolution);
@@ -129,15 +130,15 @@ for i = 1:sim_time
     i
     
     %------ Generate theta = theta_star + theta_tilda -----%
-%     theta_tilda = rand(1,3);
-%     theta_tilda = (theta_tilda - 0.5)/10;
-%     [mx, idx] = max(theta_tilda);
-%     if mx >= 0
-%         theta_tilda(idx) = 0.1;
-%     else
-%         theta_tilda(idx) = -0.1;
-%     end
-%     true_theta = true_theta_star + theta_tilda;
+    theta_tilda = rand(1,3);
+    theta_tilda = (theta_tilda - 0.5)/10;
+    [mx, idx] = max(theta_tilda);
+    if mx >= 0
+        theta_tilda(idx) = 0.05;
+    else
+        theta_tilda(idx) = -0.05;
+    end
+    true_theta = true_theta_star + theta_tilda;
     
     
     
@@ -150,17 +151,17 @@ for i = 1:sim_time
     
     %--------------- Parameter Set Update ----------------%
     if i ~= 1
-        pi_t_plus_one = parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x(:,i-1),u(i-1),x(:,i),PI_theta,PI_w,pi_t,pi_w);
-        % pi_t_plus_one = varying_parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x(:,i-1),u(i-1),x(:,i),PI_theta,PI_w,pi_t,pi_w,U,h);
-        % calculate vertices of the newly updated parameter set:
-        % remove semicolon at end of next line to output vertices 
+        % pi_t_plus_one = parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x(:,i-1),u(i-1),x(:,i),PI_theta,PI_w,pi_t,pi_w);
+        pi_t_plus_one = varying_parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x(:,i-1),u(i-1),x(:,i),PI_theta,PI_w,pi_t,pi_w,U,h);
+
         vertices = compute_vertices(PI_theta,(pi_t_plus_one)')
+        
         % update the value of pi_t
         pi_t = pi_t_plus_one';
     end
 
     %---------- Compute Paremeter Set Radial Size -----------%    
-    radial_size = compute_parameter_set_size(pi_t)
+    radial_size(i) = compute_parameter_set_size(pi_t);
     
     % update lambda_t:
     % lambda_t = update_lambda_t(vertices, H_hat);
@@ -187,7 +188,7 @@ for i = 1:sim_time
     if H_form
         [~, u(i), ~, ~, ~, ~] = compute_optimal_solution(A0, A1, A2, A3, B0, B1, B2, B3, N, H_c, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x(:,i), current_point_estimate);
     else
-        [~, u(i), ~, alpha_k, predicted_v, ~] = compute_optimal_solution_V_form(i, A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, V, PI_w, pi_w, vertices, K, R, Q, x(:,i), length(V(:,1)), U_j, PI_theta, pi_t, current_point_estimate, M0, previous_control_input,previous_v);
+        [~, u(i), ~, alpha_k, predicted_v, ~] = compute_optimal_solution_V_form(i, A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, V, PI_w, pi_w, vertices, K, R, Q, x(:,i), length(V(:,1)), U_j, PI_theta, pi_t, current_point_estimate, M0, previous_control_input,previous_v,h);
         previous_v = predicted_v;
     end
     
@@ -211,9 +212,9 @@ for i = 1:sim_time
         figure(state_evolution);
         % plot(V*x_plot<= alpha_k_1)
         if i <= 30
-            plot(x(1,i+1),x(2,i+1),'or','MarkerSize',5)
+            plot(x(1,i+1),x(2,i+1),'or-','MarkerSize',5)
         else
-            plot(x(1,i+1),x(2,i+1),'ob','MarkerSize',5)
+            plot(x(1,i+1),x(2,i+1),'ob-','MarkerSize',5)
         end
     end
     
@@ -235,9 +236,13 @@ end
 
 if to_plot
     % Title and labels for graph
-    title('Model Predictive Controller')
+    title('V-form MPC Controller Over 30 Time Steps')
     xlabel('x1') 
     ylabel('x2') 
+    grid on 
+    bla_x = linspace(-0.5,3,1000);
+    bla_y = -0.3 * ones(length(bla_x));
+    plot(bla_x,bla_y,'-')
 
     % Plot terminal parameter set
     theta = sdpvar(3,1);
@@ -248,6 +253,8 @@ if to_plot
     subplot(2,1,2);
     plot(PI_theta * theta <= pi_t)
     axis([-1 1 -1 1 -1 1])
+    figure(parameter_set_size)
+    plot(linspace(1,sim_time,sim_time), radial_size)
 end
 
 
