@@ -1,4 +1,4 @@
-function [optimal_cost, optimal_control_input, alpha_k_current, alpha_k_to_return, predicted_v, sol] = compute_optimal_solution_V_form(current_time_step, A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, V, PI_w, pi_w, vertices, K, R, Q, x_k, number_of_vertices, U_j, PI_theta, pi_theta, theta_hat, M0, previous_control_input, previous_v)
+function [optimal_cost, optimal_control_input, alpha_k_current, alpha_k_to_return, predicted_v, sol] = compute_optimal_solution_V_form(current_time_step, A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, V, PI_w, pi_w, vertices, K, R, Q, x_k, number_of_vertices, U_j, PI_theta, pi_theta, theta_hat, M0, previous_control_input, previous_v,h)
 
 m = length(vertices(:,1));
 % use compute_w_bar to get the value of w_bar for use later on:
@@ -64,7 +64,7 @@ for i = 1:N
         % Constraint type: Element-wise inequality
         Constraints = [Constraints, Lambda(:,:,i,j) >= 0];
         % Constraint type: Element-wise inequality
-        Constraints = [Constraints, Lambda(:,:,i,j) * pi_theta <= alpha_k(:,i+1) - V * compute_little_d_of_x_and_u(A0, B0, U_j(:,:,j) * alpha_k(:,i), K * U_j(:,:,j) * alpha_k(:,i) + v_k(i)) - w_bar'];
+        Constraints = [Constraints, Lambda(:,:,i,j) * (pi_theta+h) <= alpha_k(:,i+1) - V * compute_little_d_of_x_and_u(A0, B0, U_j(:,:,j) * alpha_k(:,i), K * U_j(:,:,j) * alpha_k(:,i) + v_k(i)) - w_bar'];
     end
 end
 
@@ -83,7 +83,7 @@ for j = 1:number_of_vertices
     % Constraint type: Equality constraint
     Constraints = [Constraints, Lambda(:,:,N+1,j) * PI_theta == V * compute_D_of_x_and_u(A1, A2, A3, B1, B2, B3, U_j(:,:,j) * alpha_k(:,N+1), K * U_j(:,:,j) * alpha_k(:,N+1))];
     % Constraint type: Element-wise inequality
-    Constraints = [Constraints, Lambda(:,:,N+1,j) * pi_theta <= alpha_k(:,N+1) - V * compute_little_d_of_x_and_u(A0, B0, U_j(:,:,j) * alpha_k(:,N+1), K * U_j(:,:,j) * alpha_k(:,N+1)) - w_bar'];
+    Constraints = [Constraints, Lambda(:,:,N+1,j) * (pi_theta+h) <= alpha_k(:,N+1) - V * compute_little_d_of_x_and_u(A0, B0, U_j(:,:,j) * alpha_k(:,N+1), K * U_j(:,:,j) * alpha_k(:,N+1)) - w_bar'];
     % Constraint type: Element-wise inequality
     Constraints = [Constraints, Lambda(:,:,N+1,j) >= 0];
 end
