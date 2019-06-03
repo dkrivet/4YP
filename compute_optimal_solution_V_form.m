@@ -64,7 +64,8 @@ for i = 1:N
         % Constraint type: Element-wise inequality
         Constraints = [Constraints, Lambda(:,:,i,j) >= 0];
         % Constraint type: Element-wise inequality
-        Constraints = [Constraints, Lambda(:,:,i,j) * (pi_theta+h) <= alpha_k(:,i+1) - V * compute_little_d_of_x_and_u(A0, B0, U_j(:,:,j) * alpha_k(:,i), K * U_j(:,:,j) * alpha_k(:,i) + v_k(i)) - w_bar'];
+        % Constraints = [Constraints, Lambda(:,:,i,j) * (pi_theta+h) <= alpha_k(:,i+1) - V * compute_little_d_of_x_and_u(A0, B0, U_j(:,:,j) * alpha_k(:,i), K * U_j(:,:,j) * alpha_k(:,i) + v_k(i)) - w_bar'];
+        Constraints = [Constraints, Lambda(:,:,i,j) * pi_theta <= alpha_k(:,i+1) - V * compute_little_d_of_x_and_u(A0, B0, U_j(:,:,j) * alpha_k(:,i), K * U_j(:,:,j) * alpha_k(:,i) + v_k(i)) - w_bar'];  
     end
 end
 
@@ -83,7 +84,8 @@ for j = 1:number_of_vertices
     % Constraint type: Equality constraint
     Constraints = [Constraints, Lambda(:,:,N+1,j) * PI_theta == V * compute_D_of_x_and_u(A1, A2, A3, B1, B2, B3, U_j(:,:,j) * alpha_k(:,N+1), K * U_j(:,:,j) * alpha_k(:,N+1))];
     % Constraint type: Element-wise inequality
-    Constraints = [Constraints, Lambda(:,:,N+1,j) * (pi_theta+h) <= alpha_k(:,N+1) - V * compute_little_d_of_x_and_u(A0, B0, U_j(:,:,j) * alpha_k(:,N+1), K * U_j(:,:,j) * alpha_k(:,N+1)) - w_bar'];
+    % Constraints = [Constraints, Lambda(:,:,N+1,j) * (pi_theta+h) <= alpha_k(:,N+1) - V * compute_little_d_of_x_and_u(A0, B0, U_j(:,:,j) * alpha_k(:,N+1), K * U_j(:,:,j) * alpha_k(:,N+1)) - w_bar'];
+    Constraints = [Constraints, Lambda(:,:,N+1,j) * pi_theta <= alpha_k(:,N+1) - V * compute_little_d_of_x_and_u(A0, B0, U_j(:,:,j) * alpha_k(:,N+1), K * U_j(:,:,j) * alpha_k(:,N+1)) - w_bar'];
     % Constraint type: Element-wise inequality
     Constraints = [Constraints, Lambda(:,:,N+1,j) >= 0];
 end
@@ -133,7 +135,8 @@ if current_time_step > 1 && mod(current_time_step,2) == 0
         sum = 0;
         for j = 1:length(U_j(:,:,1))
             D_hat = compute_D_of_x_and_u(A1, A2, A3, B1, B2, B3, x_hat(:,i), u_hat(i));
-            D_tilda = compute_D_of_x_and_u(A1, A2, A3, B1, B2, B3, U_j(:,:,j)*alpha_k(:,i)-x_hat(i), u_hat(i));
+            % D_tilda = compute_D_of_x_and_u(A1, A2, A3, B1, B2, B3, U_j(:,:,j)*alpha_k(:,i)-x_hat(i), u_hat(i));
+            D_tilda = compute_D_of_x_and_u(A1, A2, A3, B1, B2, B3, U_j(:,:,j)*alpha_k(:,i)-x_hat(i), K*(U_j(:,:,j)*alpha_k(:,i)-x_hat(i)) + v_k(i)-v_hat(i));
             Constraints = [Constraints, D_hat'*D_hat + D_hat'*D_tilda + D_tilda'*D_hat >= M(:,:,i)];
         end
         sum = sum + M(:,:,i);
