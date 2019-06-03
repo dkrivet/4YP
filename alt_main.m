@@ -2,7 +2,7 @@ function alt_main(H_form, to_plot)
  % time the execution of the main function 
 
 % Number of time steps to simulate:
-sim_time = 100;
+sim_time = 60;
 x = zeros(2,sim_time+1);
 u = zeros(1, sim_time);
 
@@ -34,8 +34,8 @@ U = PI_theta;
 h = [0.1;0.1;0.1;0.1;0.1;0.1];
 
 % True theta value that we will try to converge to
-% true_theta = [0.8 0.2 -0.5];
-true_theta_star = [0.8 0.2 -0.5];
+true_theta = [0.8 0.2 -0.5];
+% true_theta_star = [0.8 0.2 -0.5];
 
 
 % define F and G matrices to satisfy constraints on state and input
@@ -120,7 +120,7 @@ current_point_estimate = [0 0 0];
 
 % create sum for states
 if to_plot
-    sum_of_states = 0;
+    sum_of_states(1) = 0;
     x_plot = sdpvar(2,1);
 end
 
@@ -130,29 +130,37 @@ for i = 1:sim_time
     i
     
     %------ Generate theta = theta_star + theta_tilda -----%
-    theta_tilda = rand(1,3);
-    theta_tilda = (theta_tilda - 0.5)/10;
-    [mx, idx] = max(theta_tilda);
-    if mx >= 0
-        theta_tilda(idx) = 0.05;
-    else
-        theta_tilda(idx) = -0.05;
-    end
-    true_theta = true_theta_star + theta_tilda;
-    
+%     theta_tilda = rand(1,3);
+%     theta_tilda = (theta_tilda - 0.5)/10;
+% %     [mx, idx] = max(theta_tilda);
+% %     if mx >= 0
+% %         theta_tilda(idx) = 0.05;
+% %     else
+% %         theta_tilda(idx) = -0.05;
+% %     end
+% %     true_theta = true_theta_star + theta_tilda;
+%     for n =1:length(theta_tilda)
+%         if theta_tilda(n) >= 0
+%             theta_tilda(n) = 0.05;
+%         else
+%             theta_tilda(n) = -0.05;
+%         end
+%     end
+%     true_theta = true_theta_star + theta_tilda;
+%     
     
     
     if to_plot
-        sum_of_states = sum_of_states + norm(x(:,i))^2;
+        sum_of_states(i+1) = sum_of_states(i) + norm(x(:,i))^2;
         figure(state_sum);
         hold on
-        plot(i,sum_of_states,'x','MarkerSize',5)
+        plot(i,sum_of_states(i+1),'x','MarkerSize',5)
     end
     
     %--------------- Parameter Set Update ----------------%
     if i ~= 1
-        % pi_t_plus_one = parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x(:,i-1),u(i-1),x(:,i),PI_theta,PI_w,pi_t,pi_w);
-        pi_t_plus_one = varying_parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x(:,i-1),u(i-1),x(:,i),PI_theta,PI_w,pi_t,pi_w,U,h);
+        pi_t_plus_one = parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x(:,i-1),u(i-1),x(:,i),PI_theta,PI_w,pi_t,pi_w);
+        % pi_t_plus_one = varying_parameter_set_update(A0,A1,A2,A3,B0,B1,B2,B3,x(:,i-1),u(i-1),x(:,i),PI_theta,PI_w,pi_t,pi_w,U,h);
 
         vertices = compute_vertices(PI_theta,(pi_t_plus_one)')
         
@@ -188,7 +196,7 @@ for i = 1:sim_time
     if H_form
         [~, u(i), ~, ~, ~, ~] = compute_optimal_solution(A0, A1, A2, A3, B0, B1, B2, B3, N, H_c, G, theta_hat_transpose, H_hat, V, PI_w, pi_w, vertices, K, R, Q, x(:,i), current_point_estimate);
     else
-        [~, u(i), ~, alpha_k, predicted_v, ~] = compute_optimal_solution_V_form(i, A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, V, PI_w, pi_w, vertices, K, R, Q, x(:,i), length(V(:,1)), U_j, PI_theta, pi_t, current_point_estimate, M0, previous_control_input,previous_v,h);
+        [~, u(i), ~, ~, predicted_v, ~] = compute_optimal_solution_V_form(i, A0, A1, A2, A3, B0, B1, B2, B3, N, F, G, V, PI_w, pi_w, vertices, K, R, Q, x(:,i), length(V(:,1)), U_j, PI_theta, pi_t, current_point_estimate, M0, previous_control_input,previous_v,h);
         previous_v = predicted_v;
     end
     
@@ -200,6 +208,13 @@ for i = 1:sim_time
     [A_theta, B_theta] = calculate_AandB_theta_j(B0,B1,B2,B3,A0,A1,A2,A3,true_theta);
     % w_t = [(round(rand) - 0.5)/5;(round(rand) - 0.5)/5];
     w_t = [(randi([0 2000])-1000)/10000;(randi([0 2000])-1000)/10000];
+%     for z=1:length(w_t)
+%         if w_t(z) >= 0
+%             w_t(z) = 0.1;
+%         else
+%             w_t(z) = -0.1;
+%         end
+%     end
     [~, idx] = max(w_t);
     w_t(idx) = (round(rand) - 0.5)/5;
     x(:,i+1) = A_theta * x(:,i) + B_theta * u(i) + w_t;
@@ -216,6 +231,11 @@ for i = 1:sim_time
         else
             plot(x(1,i+1),x(2,i+1),'ob-','MarkerSize',5)
         end
+%         if mod(i,2) == 0
+%             plot(x(1,i+1),x(2,i+1),'or-','MarkerSize',5)
+%         else
+%             plot(x(1,i+1),x(2,i+1),'ob-','MarkerSize',5)
+%         end
     end
     
     %------------DO PE Check----------------%
@@ -258,5 +278,6 @@ if to_plot
 end
 
 
+radial_size(end)
 
 end 
